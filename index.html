@@ -1773,7 +1773,7 @@
     function updateGeminiStatusBadge(active) {
       const pill = $('gemini-status-pill');
       if (active) {
-        pill.textContent = 'Active (Gemini 2.5 Flash)';
+        pill.textContent = 'Active (Gemini 1.5 Flash)';
         pill.className = 'text-[10px] font-mono px-2 py-0.5 rounded border font-semibold bg-emerald-950/80 border-emerald-700 text-emerald-300';
       } else {
         pill.textContent = 'Inactive (Local Fallback)';
@@ -1782,23 +1782,42 @@
     }
 
     async function testGeminiApiKey() {
-      const apiKey = $('param-gemini-key').value.trim();
+      const rawKey = $('param-gemini-key').value.trim();
       const feedback = $('test-key-feedback');
       const spinner = $('test-key-spinner');
 
+      if (!rawKey) {
+        feedback.textContent = 'Please paste your Gemini API key first.';
+        feedback.className = 'text-[11px] font-mono mt-1 text-amber-400 font-semibold';
+        return;
+      }
+
       spinner.classList.remove('hidden');
-      feedback.textContent = 'Verifying key with Gemini API…';
+      feedback.textContent = 'Connecting to Google Gemini API…';
       feedback.className = 'text-[11px] font-mono mt-1 text-slate-400';
 
-      const res = await api('POST', '/api/ai/test-key', { apiKey });
-      spinner.classList.add('hidden');
+      try {
+        const res = await fetch('/api/ai/test-key', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ apiKey: rawKey }),
+        }).then(r => r.json()).catch(() => null);
 
-      if (res && res.valid) {
-        feedback.textContent = 'Success: ' + res.message;
-        feedback.className = 'text-[11px] font-mono mt-1 text-emerald-400 font-semibold';
-        updateGeminiStatusBadge(true);
-      } else {
-        feedback.textContent = res ? res.message : 'Invalid API key or network error.';
+        spinner.classList.add('hidden');
+
+        if (res && res.valid) {
+          feedback.textContent = '✓ ' + res.message;
+          feedback.className = 'text-[11px] font-mono mt-1 text-emerald-400 font-semibold';
+          updateGeminiStatusBadge(true);
+        } else {
+          const msg = res && res.message ? res.message : 'Could not authenticate. Check your connection or API key.';
+          feedback.textContent = '✗ ' + msg;
+          feedback.className = 'text-[11px] font-mono mt-1 text-red-400 font-semibold';
+          updateGeminiStatusBadge(false);
+        }
+      } catch (err) {
+        spinner.classList.add('hidden');
+        feedback.textContent = '✗ Connection error: ' + err.message;
         feedback.className = 'text-[11px] font-mono mt-1 text-red-400 font-semibold';
         updateGeminiStatusBadge(false);
       }

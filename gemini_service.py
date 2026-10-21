@@ -9,19 +9,29 @@ Connects to Google Gemini (gemini-1.5-flash / gemini-2.0-flash) to provide:
 
 import json
 import os
+import ssl
 import urllib.error
 import urllib.request
 
-# Stable production model in Google Generative AI API
 PRIMARY_MODEL = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
 FALLBACK_MODELS = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"]
+
+
+def clean_api_key(raw_key):
+    """Sanitize API key by stripping quotes, whitespace, and pasted export prefixes."""
+    if not raw_key:
+        return ""
+    k = str(raw_key).strip()
+    if "=" in k and ("KEY" in k.upper() or "GEMINI" in k.upper()):
+        k = k.split("=", 1)[1].strip()
+    return k.strip("\"'`; \t\n\r")
 
 
 def get_api_key(profile=None):
     """Retrieve the Gemini API key from profile settings or environment."""
     if profile and profile.get("geminiApiKey"):
-        return profile["geminiApiKey"].strip()
-    return os.environ.get("GEMINI_API_KEY", "").strip()
+        return clean_api_key(profile["geminiApiKey"])
+    return clean_api_key(os.environ.get("GEMINI_API_KEY", ""))
 
 
 def is_available(profile=None):
@@ -29,8 +39,22 @@ def is_available(profile=None):
     return bool(get_api_key(profile))
 
 
+def _safe_urlopen(req, timeout=15):
+    """Open request with SSL fallback for macOS environments missing local cert bundles."""
+    try:
+        ctx = ssl.create_default_context()
+        return urllib.request.urlopen(req, timeout=timeout, context=ctx)
+    except urllib.error.URLError as err:
+        err_str = str(err)
+        if "CERTIFICATE_VERIFY_FAILED" in err_str or "certificate verify failed" in err_str:
+            unverified_ctx = ssl._create_unverified_context()
+            return urllib.request.urlopen(req, timeout=timeout, context=unverified_ctx)
+        raise
+
+
 def _call_gemini_model(model_name, api_key, prompt, system_instruction=None, json_mode=False, timeout=20):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+    clean_key = clean_api_key(api_key)
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={clean_key}"
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {
@@ -54,7 +78,7 @@ def _call_gemini_model(model_name, api_key, prompt, system_instruction=None, jso
         method="POST"
     )
 
-    with urllib.request.urlopen(req, timeout=timeout) as response:
+    with _safe_urlopen(req, timeout=timeout) as response:
         res_body = response.read().decode("utf-8")
         res_json = json.loads(res_body)
         candidates = res_json.get("candidates", [])
@@ -67,23 +91,21 @@ def _call_gemini_model(model_name, api_key, prompt, system_instruction=None, jso
 
 def _call_gemini(api_key, prompt, system_instruction=None, json_mode=False, timeout=20):
     """Call Google Gemini REST API with model fallback."""
-    if not api_key:
+    clean_key = clean_api_key(api_key)
+    if not clean_key:
         return None
 
-    # Try primary model first, then fallbacks
     models_to_try = [PRIMARY_MODEL] + [m for m in FALLBACK_MODELS if m != PRIMARY_MODEL]
     last_error = None
 
     for model in models_to_try:
         try:
-            return _call_gemini_model(model, api_key, prompt, system_instruction, json_mode, timeout)
+            return _call_gemini_model(model, clean_key, prompt, system_instruction, json_mode, timeout)
         except urllib.error.HTTPError as err:
             err_msg = err.read().decode("utf-8", errors="replace")
             last_error = f"HTTP {err.code}: {err_msg}"
-            # If 404 (model not found), try the next model
             if err.code == 404:
                 continue
-            # For 400 (bad key), 403 (forbidden), no point retrying another model
             break
         except Exception as exc:
             last_error = str(exc)
@@ -96,7 +118,7 @@ def _call_gemini(api_key, prompt, system_instruction=None, json_mode=False, time
 
 def test_api_key(api_key):
     """Verify an API key by making a test call, returning (success, detailed_message)."""
-    clean_key = (api_key or "").strip()
+    clean_key = clean_api_key(api_key)
     if not clean_key:
         return False, "Please enter an API key."
 
@@ -104,12 +126,12 @@ def test_api_key(api_key):
 
     for model in models_to_try:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={clean_key}"
-        payload = {"contents": [{"parts": [{"text": "ping"}]}]}
+        payload = {"contents": [{"parts": [{"text": "Hello"}]}]}
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"}, method="POST")
 
         try:
-            with urllib.request.urlopen(req, timeout=12) as response:
+            with _safe_urlopen(req, timeout=12) as response:
                 if response.status == 200:
                     return True, f"Verified: Connected successfully to Gemini ({model})!"
         except urllib.error.HTTPError as err:
@@ -120,7 +142,6 @@ def test_api_key(api_key):
                 if "API_KEY_INVALID" in raw_err or "API key not valid" in msg:
                     return False, "Invalid API key. Please generate a new key at aistudio.google.com."
                 if err.code == 404:
-                    # Model not found, try next model
                     continue
                 return False, f"Gemini Error ({err.code}): {msg or 'Authentication failed'}"
             except Exception:
