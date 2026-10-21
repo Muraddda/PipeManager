@@ -1,3 +1,4 @@
+import gzip
 import http.server
 import json
 import os
@@ -18,6 +19,7 @@ EXTRA_HOSTS = {h.strip().lower() for h in os.environ.get("PIPELINE_ALLOWED_HOSTS
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_FILES = {"/": "index.html", "/index.html": "index.html"}
 MAX_BODY = 1_000_000
+GZIP_MIN_BYTES = 1024  # below this, compression costs more than it saves
 
 
 class ApiError(Exception):
@@ -201,12 +203,23 @@ def resolve(method, path):
 
 class PipelineHandler(http.server.BaseHTTPRequestHandler):
     server_version = "JobPipeline/2"
+    protocol_version = "HTTP/1.1"  # keep-alive: one TCP/TLS setup per session instead of per request
 
     def _send(self, body, status, content_type, extra=None):
+        if status >= 400:
+            # The request body may be unread (413, 415, 403), which would corrupt a reused connection.
+            self.close_connection = True
+            extra = {**(extra or {}), "Connection": "close"}
+        headers = dict(extra or {})
+        if len(body) >= GZIP_MIN_BYTES and "gzip" in self.headers.get("Accept-Encoding", "").lower():
+            # The board payload is repetitive JSON/HTML (about 2.2 MB -> 33 KB at 500 roles).
+            body = gzip.compress(body, 5)
+            headers["Content-Encoding"] = "gzip"
+        headers["Vary"] = "Accept-Encoding"
         self.send_response(status)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
-        for name, value in (extra or {}).items():
+        for name, value in headers.items():
             self.send_header(name, value)
         self.end_headers()
         self.wfile.write(body)

@@ -666,24 +666,40 @@
       `;
     }
 
-    function renderBoard() {
+    // One pass buckets cards by stage (was a filter + sort over every role, once per column).
+    function renderBoardNow() {
       const q = state.searchQuery.toLowerCase();
+      const buckets = new Map(STAGES.map((stage) => [stage.id, []]));
+      for (const opp of state.opportunities) {
+        if (matchesSearch(opp, q)) buckets.get(opp.stageId)?.push(opp);
+      }
       let totalTargetVal = 0;
 
       const columns = STAGES
         .filter((stage) => state.stageFilter === 'all' || stage.id === state.stageFilter)
         .map((stage) => {
-          const stageOpps = state.opportunities
-            .filter((opp) => opp.stageId === stage.id && matchesSearch(opp, q))
-            .sort(byOrderIndex);
+          const stageOpps = buckets.get(stage.id).sort(byOrderIndex);
           const stageSum = stageOpps.reduce((sum, opp) => sum + Number(opp.value), 0);
           totalTargetVal += stageSum;
           return renderColumn(stage, stageOpps, stageSum);
         });
 
+      // Keep each column's scroll position; replacing innerHTML would jump every list to the top.
+      const scrolls = [...document.querySelectorAll('#board-container .cards-list')].map((el) => el.scrollTop);
       $('board-container').innerHTML = columns.join('');
+      document.querySelectorAll('#board-container .cards-list').forEach((el, i) => { el.scrollTop = scrolls[i] || 0; });
       $('pipeline-total-val').textContent = `$${(totalTargetVal / 1000).toFixed(0)}k Target Pipeline`;
       refreshIcons();
+    }
+
+    // Typing in a field or the search box can request many renders per frame; draw once.
+    let boardFrame = 0;
+    function renderBoard() {
+      if (boardFrame) return;
+      boardFrame = requestAnimationFrame(() => {
+        boardFrame = 0;
+        renderBoardNow();
+      });
     }
 
     // Single delegated listener for every card on the board.
