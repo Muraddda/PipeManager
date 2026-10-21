@@ -1,7 +1,7 @@
 """Gemini AI integration service for PipeManager.
 
 Uses Python standard library (urllib.request) with zero external dependencies.
-Connects to Google Gemini (gemini-2.5-flash) to provide:
+Connects to Google Gemini (gemini-1.5-flash / gemini-2.0-flash) to provide:
 1. Semantic job posting analysis grounded in the candidate's real profile
 2. Contextual, authentic email drafting tailored to the hiring manager and target role
 3. Natural-language anti-slop auditing and rewriting
@@ -12,8 +12,9 @@ import os
 import urllib.error
 import urllib.request
 
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
-GEMINI_BASE_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
+# Stable production model in Google Generative AI API
+PRIMARY_MODEL = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
+FALLBACK_MODELS = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"]
 
 
 def get_api_key(profile=None):
@@ -28,12 +29,8 @@ def is_available(profile=None):
     return bool(get_api_key(profile))
 
 
-def _call_gemini(api_key, prompt, system_instruction=None, json_mode=False, timeout=20):
-    """Call Google Gemini REST API using urllib.request."""
-    if not api_key:
-        return None
-
-    url = f"{GEMINI_BASE_URL}?key={api_key}"
+def _call_gemini_model(model_name, api_key, prompt, system_instruction=None, json_mode=False, timeout=20):
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {
@@ -57,33 +54,83 @@ def _call_gemini(api_key, prompt, system_instruction=None, json_mode=False, time
         method="POST"
     )
 
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as response:
-            res_body = response.read().decode("utf-8")
-            res_json = json.loads(res_body)
-            candidates = res_json.get("candidates", [])
-            if candidates:
-                parts = candidates[0].get("content", {}).get("parts", [])
-                if parts:
-                    return parts[0].get("text", "")
-            return ""
-    except urllib.error.HTTPError as err:
-        err_msg = err.read().decode("utf-8", errors="replace")
-        print(f"[Gemini API HTTPError {err.code}]: {err_msg}")
+    with urllib.request.urlopen(req, timeout=timeout) as response:
+        res_body = response.read().decode("utf-8")
+        res_json = json.loads(res_body)
+        candidates = res_json.get("candidates", [])
+        if candidates:
+            parts = candidates[0].get("content", {}).get("parts", [])
+            if parts:
+                return parts[0].get("text", "")
+        return ""
+
+
+def _call_gemini(api_key, prompt, system_instruction=None, json_mode=False, timeout=20):
+    """Call Google Gemini REST API with model fallback."""
+    if not api_key:
         return None
-    except Exception as exc:
-        print(f"[Gemini API Exception]: {exc}")
-        return None
+
+    # Try primary model first, then fallbacks
+    models_to_try = [PRIMARY_MODEL] + [m for m in FALLBACK_MODELS if m != PRIMARY_MODEL]
+    last_error = None
+
+    for model in models_to_try:
+        try:
+            return _call_gemini_model(model, api_key, prompt, system_instruction, json_mode, timeout)
+        except urllib.error.HTTPError as err:
+            err_msg = err.read().decode("utf-8", errors="replace")
+            last_error = f"HTTP {err.code}: {err_msg}"
+            # If 404 (model not found), try the next model
+            if err.code == 404:
+                continue
+            # For 400 (bad key), 403 (forbidden), no point retrying another model
+            break
+        except Exception as exc:
+            last_error = str(exc)
+            break
+
+    if last_error:
+        print(f"[Gemini API Call Failed]: {last_error}")
+    return None
 
 
 def test_api_key(api_key):
-    """Verify an API key by making a minimal test call."""
-    if not api_key:
-        return False, "API key is required"
-    res = _call_gemini(api_key, "Respond with: ok", timeout=10)
-    if res is not None:
-        return True, "API Key is valid and active"
-    return False, "Could not authenticate with Gemini API. Check your key."
+    """Verify an API key by making a test call, returning (success, detailed_message)."""
+    clean_key = (api_key or "").strip()
+    if not clean_key:
+        return False, "Please enter an API key."
+
+    models_to_try = [PRIMARY_MODEL] + [m for m in FALLBACK_MODELS if m != PRIMARY_MODEL]
+
+    for model in models_to_try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={clean_key}"
+        payload = {"contents": [{"parts": [{"text": "ping"}]}]}
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"}, method="POST")
+
+        try:
+            with urllib.request.urlopen(req, timeout=12) as response:
+                if response.status == 200:
+                    return True, f"Verified: Connected successfully to Gemini ({model})!"
+        except urllib.error.HTTPError as err:
+            raw_err = err.read().decode("utf-8", errors="replace")
+            try:
+                err_json = json.loads(raw_err)
+                msg = err_json.get("error", {}).get("message", "")
+                if "API_KEY_INVALID" in raw_err or "API key not valid" in msg:
+                    return False, "Invalid API key. Please generate a new key at aistudio.google.com."
+                if err.code == 404:
+                    # Model not found, try next model
+                    continue
+                return False, f"Gemini Error ({err.code}): {msg or 'Authentication failed'}"
+            except Exception:
+                return False, f"Authentication error (HTTP {err.code})."
+        except urllib.error.URLError as err:
+            return False, f"Network error connecting to Gemini API: {err.reason}"
+        except Exception as exc:
+            return False, f"Connection failed: {str(exc)}"
+
+    return False, "Could not connect to Gemini models. Check your API key at aistudio.google.com."
 
 
 def _build_system_grounding(profile):
@@ -102,7 +149,7 @@ def _build_system_grounding(profile):
     return f"""You are the truth-grounded career intelligence engine for {name}.
 Candidate Profile:
 - Target Role: {role}
-- Client/Work Experience: {years}+ years
+- Experience: {years}+ years
 - Location: {location}
 - Professional Background: {summary}
 

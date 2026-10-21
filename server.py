@@ -68,12 +68,13 @@ def update_profile(conn, match, body):
 
 
 def test_gemini_key(conn, match, body):
-    key = body.get("apiKey")
+    key = (body.get("apiKey") or "").strip()
     if not key:
         prof = db.get_profile_dict(conn)
         key = prof.get("geminiApiKey") or os.environ.get("GEMINI_API_KEY", "")
     ok, msg = gemini_service.test_api_key(key)
-    return {"valid": ok, "message": msg}, 200 if ok else 400
+    # Always return 200 so the client receives the exact message string
+    return {"valid": ok, "message": msg}, 200
 
 
 def anti_slop_linter(conn, match, body):
