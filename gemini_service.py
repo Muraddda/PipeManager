@@ -1,7 +1,7 @@
 """Gemini AI integration service for PipeManager.
 
 Uses Python standard library (urllib.request) with zero external dependencies.
-Connects to Google Gemini (gemini-1.5-flash / gemini-2.0-flash) to provide:
+Connects to Google Gemini (gemini-2.5-flash with fallbacks) to provide:
 1. Semantic job posting analysis grounded in the candidate's real profile
 2. Contextual, authentic email drafting tailored to the hiring manager and target role
 3. Natural-language anti-slop auditing and rewriting
@@ -13,8 +13,8 @@ import urllib.error
 import urllib.request
 
 # Stable production model in Google Generative AI API
-PRIMARY_MODEL = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
-FALLBACK_MODELS = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"]
+PRIMARY_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+FALLBACK_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"]
 
 
 def get_api_key(profile=None):
