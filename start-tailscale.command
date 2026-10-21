@@ -1,13 +1,13 @@
 #!/bin/bash
 # Double-click in Finder to start Pipeline Studio on this Mac, reachable over Tailscale.
-# Edit TS_IP / TS_NAME below if your Tailscale address or name changes.
+# Defaults are for maxs-macbook-air. Override TS_IP / TS_NAME if the host changes.
 cd "$(dirname "$0")"
 
-TS_IP="${TS_IP:-100.70.216.10}"
-TS_NAME="${TS_NAME:-max.taile46ae8.ts.net}"
+TS_IP="${TS_IP:-100.67.212.42}"
+TS_NAME="${TS_NAME:-maxs-macbook-air.taile46ae8.ts.net}"
 
 export PIPELINE_BIND="$TS_IP"
-export PIPELINE_ALLOWED_HOSTS="$TS_IP,$TS_NAME,max"
+export PIPELINE_ALLOWED_HOSTS="$TS_IP,$TS_NAME,maxs-macbook-air"
 
 echo "Open from any device on your tailnet:"
 echo "  http://$TS_IP:8000"
