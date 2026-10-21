@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Hunt Pipeline Studio V2</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            slate: {
+              850: '#111827',
+              900: '#0b1120',
+              950: '#060a12',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+  <style>
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+    ::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(71, 85, 105, 1); }
+    .cockpit-enter { animation: slideInRight 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0.5; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .left-panel-enter { animation: slideInLeft 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 h-screen w-screen flex flex-col overflow-hidden font-sans select-none">
+
+  <!-- ================= TOP HEADER BAR ================= -->
+  <header class="h-16 px-6 border-b border-slate-800/80 bg-slate-900/70 backdrop-blur flex items-center justify-between z-20 flex-shrink-0">
+    <div class="flex items-center gap-5">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-emerald-600/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <span class="text-[10px] uppercase tracking-wider text-slate-500 font-mono font-medium">Max Mardan • Sales &amp; Fintech Edition</span>
+          <h1 class="text-base font-semibold text-white tracking-tight flex items-center gap-2">
+            Target Roles & Opportunities
+            <span class="text-xs font-normal text-emerald-400 bg-emerald-950/60 border border-emerald-800/50 px-2 py-0.5 rounded-full font-mono" id="pipeline-total-val">
+              $0k Target Pipeline
+            </span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- State Indicator Pill -->
+      <div class="hidden md:flex items-center gap-2 text-xs bg-slate-800/60 border border-slate-700/60 rounded-full px-3 py-1">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-slate-300 font-medium" id="current-state-label">State 1: All Opportunity Board</span>
+      </div>
+    </div>
+
+    <!-- Filter & Action Controls -->
+    <div class="flex items-center gap-3">
+      <!-- Live Search Filter -->
+      <div class="relative w-64">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input
+          id="search-input"
+          type="text"
+          placeholder="Filter companies, roles, contacts..."
+          class="w-full bg-slate-800/80 border border-slate-700/70 rounded-md pl-9 pr-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition"
+        />
+      </div>
+
+      <!-- Stage Filter Dropdown -->
+      <select id="stage-filter" class="bg-slate-800/80 border border-slate-700/70 rounded-md px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+        <option value="all">All Stages</option>
+      </select>
+
+      <button id="btn-add-opp" class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-xs font-medium shadow-sm transition">
+        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+        <span>Add Application</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= STATE 1: ALL OPPORTUNITY BOARD ================= -->
+  <main id="board-container" class="flex-1 flex gap-4 p-5 overflow-x-auto overflow-y-hidden bg-gradient-to-b from-slate-950 via-slate-900/40 to-slate-950 relative">
+    <!-- Swimlanes dynamically injected here -->
+  </main>
+
+  <!-- ================= AUXILIARY WORKSPACE: LEFT-OF-COCKPIT (COVERS BOARD) ================= -->
+  <div id="aux-workspace" class="hidden fixed top-16 left-0 right-[530px] bottom-0 bg-slate-950/95 border-r border-slate-800 shadow-2xl z-30 flex flex-col left-panel-enter">
+    <!-- Aux Header & Tab Switcher -->
+    <div class="h-12 px-5 border-b border-slate-800 bg-slate-900/80 flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Visibility & Outreach:</span>
+        <button id="tab-btn-browser" class="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border bg-blue-600/20 text-blue-300 border-blue-500/40">
+          <i data-lucide="globe" class="w-3.5 h-3.5"></i> Job Posting
+        </button>
+        <button id="tab-btn-gmail" class="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700">
+          <i data-lucide="mail" class="w-3.5 h-3.5"></i> Gmail Studio
+        </button>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="text-[11px] text-slate-500 font-mono">Linked to <span id="aux-company-name" class="text-slate-300 font-semibold">Company</span></span>
+        <button id="btn-close-aux" class="flex items-center gap-1 px-2.5 py-1 text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded transition border border-slate-700/60">
+          <i data-lucide="eye" class="w-3.5 h-3.5"></i> Hide & View Board
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= TAB CONTENT 1: BUILT-IN WEB BROWSER ================= -->
+    <div id="aux-browser-view" class="flex-1 flex flex-col overflow-hidden">
+      <!-- Browser Nav Address Bar -->
+      <div class="h-11 px-4 border-b border-slate-800 bg-slate-900/60 flex items-center gap-2 flex-shrink-0">
+        <div class="flex-1 relative flex items-center">
+          <i data-lucide="lock" class="w-3 h-3 text-emerald-400 absolute left-2.5"></i>
+          <input
+            id="browser-url-input"
+            type="text"
+            value=""
+            placeholder="Paste the job posting URL"
+            class="w-full bg-slate-950/80 border border-slate-700/70 rounded-md pl-8 pr-28 py-1 text-xs text-slate-200 font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+          <button id="btn-clip-job" class="absolute right-1 px-2 py-0.5 bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/40 rounded text-[11px] font-medium transition flex items-center gap-1">
+            <i data-lucide="target" class="w-3 h-3"></i> Analyze Posting
+          </button>
+        </div>
+        <div class="flex items-center gap-1">
+          <button id="btn-open-posting" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[11px] text-slate-300 border border-slate-700 flex items-center gap-1">
+            <i data-lucide="external-link" class="w-3 h-3"></i> Open in new tab
+          </button>
+        </div>
+      </div>
+
+      <!-- Rendered Page Simulation -->
+      <div id="browser-content" class="flex-1 overflow-y-auto p-8 bg-slate-900/30 space-y-6">
+        <!-- Injected Career Page Content -->
+      </div>
+    </div>
+
+    <!-- ================= TAB CONTENT 2: GMAIL DRAFTING STUDIO ================= -->
+    <div id="aux-gmail-view" class="hidden flex-1 flex flex-col overflow-hidden bg-slate-950">
+      <!-- Gmail Header Toolbar -->
+      <div class="h-11 px-5 border-b border-slate-800 bg-slate-900/70 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+          <span class="text-xs font-semibold text-slate-200">Gmail Studio (Anti-Slop Linter)</span>
+        </div>
+        <!-- Recipient & Strategy Switcher -->
+        <div class="flex items-center gap-1.5">
+          <span class="text-[10px] text-slate-500 font-mono uppercase">Target:</span>
+          <button id="btn-target-hm" class="px-2.5 py-1 bg-purple-600/30 text-purple-300 border border-purple-500/50 text-[11px] rounded font-medium">
+            Hiring Manager (Back-Channel)
+          </button>
+          <button id="btn-target-recruiter" class="px-2.5 py-1 bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700 text-[11px] rounded font-medium">
+            Talent Partner
+          </button>
+        </div>
+      </div>
+
+      <!-- Template Selectors -->
+      <div class="px-5 py-2 border-b border-slate-800/80 bg-slate-900/40 flex items-center gap-2 overflow-x-auto flex-shrink-0 text-xs">
+        <span class="text-[11px] text-slate-500 font-mono">Strategy:</span>
+        <button class="gmail-template-btn px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-slate-200" data-template="backchannel">
+          HM Direct Note
+        </button>
+        <button class="gmail-template-btn px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-slate-200" data-template="followup">
+          Screening Follow-up
+        </button>
+        <button class="gmail-template-btn px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-slate-200" data-template="thankyou">
+          Post-Interview Thank You
+        </button>
+        <button class="gmail-template-btn px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-slate-200" data-template="counter">
+          Offer Negotiation
+        </button>
+      </div>
+
+      <!-- Gmail Compose Form -->
+      <div class="flex-1 flex flex-col p-6 space-y-3 overflow-y-auto">
+        <div class="flex items-center border-b border-slate-800 pb-2">
+          <span class="w-16 text-xs text-slate-500 font-mono">From:</span>
+          <span id="gmail-from" class="text-xs text-slate-300 font-mono">your Gmail account</span>
+        </div>
+        <div class="flex items-center border-b border-slate-800 pb-2">
+          <span class="w-16 text-xs text-slate-500 font-mono">To:</span>
+          <input id="gmail-to-input" type="email" class="flex-1 bg-transparent text-xs text-slate-100 focus:outline-none font-mono" placeholder="Add their email in the cockpit">
+          <span id="gmail-target-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-950/80 border border-purple-800/60 text-purple-300">Hiring Manager</span>
+        </div>
+        <div class="flex items-center border-b border-slate-800 pb-2">
+          <span class="w-16 text-xs text-slate-500 font-mono">Subject:</span>
+          <input id="gmail-subject-input" type="text" class="flex-1 bg-transparent text-xs text-slate-100 font-medium focus:outline-none" placeholder="Subject">
+        </div>
+
+        <!-- Rich Text / Body Area -->
+        <div class="flex-1 flex flex-col pt-1 relative">
+          <textarea
+            id="gmail-body-textarea"
+            class="flex-1 w-full bg-slate-900/50 border border-slate-800 rounded-lg p-4 text-xs text-slate-200 leading-relaxed font-sans focus:outline-none focus:ring-1 focus:ring-red-500/50 placeholder:text-slate-600 resize-none"
+            placeholder="Pick a strategy above to draft from your verified stories"
+          ></textarea>
+
+          <!-- Anti-Slop Audit Banner -->
+          <div id="antislop-audit-box" class="mt-2 p-2.5 bg-slate-900/90 border border-slate-800 rounded-md flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span class="text-slate-300 font-medium">Human Authenticity Linter:</span>
+              <span id="authenticity-score" class="font-mono text-slate-400 font-semibold">Not checked</span>
+            </div>
+            <button id="btn-run-antislop" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded text-[11px] font-medium flex items-center gap-1 transition">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i> Audit Wording
+            </button>
+          </div>
+        </div>
+
+        <!-- Gmail Send & Action Bar -->
+        <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <button id="btn-gmail-send" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-md text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+              <i data-lucide="send" class="w-3.5 h-3.5"></i> Open in Gmail
+            </button>
+            <button id="btn-gmail-save-draft" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-md text-xs font-medium transition flex items-center gap-1.5">
+              <i data-lucide="save" class="w-3.5 h-3.5"></i> Save to Comms History
+            </button>
+          </div>
+          <span id="gmail-hint" class="text-[11px] text-slate-500 font-mono">Opens Gmail with this draft; nothing is sent from here</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= STATE 2: SINGLE OPPORTUNITY COCKPIT (RIGHT DRAWER) ================= -->
+  <aside id="cockpit-drawer" class="hidden fixed top-16 right-0 bottom-0 w-[530px] max-w-full bg-slate-900 border-l border-slate-800 shadow-2xl z-40 flex flex-col cockpit-enter">
+    <!-- Top Cockpit Header -->
+    <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90 backdrop-blur">
+      <div class="flex items-center gap-2">
+        <div id="cockpit-match-pill" class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-700 text-emerald-400 font-bold">
+          UNSCORED
+        </div>
+        <div>
+          <h2 id="cockpit-title" class="text-sm font-semibold text-white truncate max-w-[340px]">Company Role</h2>
+        </div>
+      </div>
+      <div class="flex items-center gap-1">
+        <button id="cockpit-delete-btn" title="Delete Application" class="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded transition">
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
+        </button>
+        <button id="cockpit-close-btn" title="Close Cockpit (ESC)" class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Attributes Form (saved to the database as you type) -->
+    <div class="p-4 border-b border-slate-800/80 bg-slate-950/40 grid grid-cols-2 gap-3 text-xs">
+      <div>
+        <label class="text-[10px] font-medium text-slate-400 block mb-1">COMPANY</label>
+        <input id="cockpit-company" type="text" placeholder="Company" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200  focus:ring-1 focus:ring-emerald-500">
+      </div>
+      <div>
+        <label class="text-[10px] font-medium text-slate-400 block mb-1">ROLE</label>
+        <input id="cockpit-title-input" type="text" placeholder="Role title" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200  focus:ring-1 focus:ring-emerald-500">
+      </div>
+      <div>
+        <label class="text-[10px] font-medium text-slate-400 block mb-1">STAGE</label>
+        <select id="cockpit-stage-select" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200 focus:ring-1 focus:ring-emerald-500"></select>
+      </div>
+      <div>
+        <label class="text-[10px] font-medium text-slate-400 block mb-1">TARGET TOTAL COMP ($)</label>
+        <input id="cockpit-value-input" type="number" step="5000" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200 font-mono focus:ring-1 focus:ring-emerald-500">
+      </div>
+      <div>
+        <label class="text-[10px] font-medium text-slate-400 block mb-1">HIRING MANAGER (KEY TARGET)</label>
+        <input id="cockpit-hm-name" type="text" placeholder="e.g. Director of Sales" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200  focus:ring-1 focus:ring-emerald-500">
+      </div>
+      <div>
+        <label class="text-[10px] font-medium text-slate-400 block mb-1">HIRING MANAGER EMAIL</label>
+        <input id="cockpit-hm-email" type="text" placeholder="name@company.com" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200 font-mono focus:ring-1 focus:ring-emerald-500">
+      </div>
+      <div>
+        <label class="text-[10px] font-medium text-slate-400 block mb-1">RECRUITER</label>
+        <input id="cockpit-contact-name" type="text" placeholder="Recruiter name" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200  focus:ring-1 focus:ring-emerald-500">
+      </div>
+      <div>
+        <label class="text-[10px] font-medium text-slate-400 block mb-1">RECRUITER EMAIL</label>
+        <input id="cockpit-contact-email" type="text" placeholder="name@company.com" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200 font-mono focus:ring-1 focus:ring-emerald-500">
+      </div>
+    </div>
+
+    <!-- ================= DYNAMIC TOOL DOCK ================= -->
+    <div class="px-4 py-2 border-b border-slate-800 bg-slate-950/70 flex items-center gap-1.5 overflow-x-auto flex-shrink-0">
+      <span class="text-[10px] font-semibold tracking-wider uppercase text-slate-500 mr-0.5 flex items-center gap-1">
+        <i data-lucide="layers" class="w-3 h-3"></i> Tools:
+      </span>
+
+      <!-- Aux Callouts -->
+      <button id="tag-browser" class="tool-tag-pill flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition border cursor-pointer">
+        <i data-lucide="globe" class="w-3 h-3 text-blue-400"></i>
+        <span>Browser</span>
+      </button>
+
+      <button id="tag-gmail" class="tool-tag-pill flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition border cursor-pointer">
+        <i data-lucide="mail" class="w-3 h-3 text-red-400"></i>
+        <span>Gmail</span>
+      </button>
+
+      <!-- Match Matrix Tool Tag (NEW) -->
+      <button id="tag-match" class="tool-tag-pill flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition border cursor-pointer">
+        <i data-lucide="target" class="w-3 h-3 text-emerald-400"></i>
+        <span>Match &amp; Gaps</span>
+      </button>
+
+      <!-- STAR Stories / Notes -->
+      <button id="tag-notes" class="tool-tag-pill flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition border cursor-pointer">
+        <i data-lucide="award" class="w-3 h-3 text-amber-400"></i>
+        <span>STAR Stories</span>
+        <span id="tag-badge-notes" class="text-[10px] font-mono px-1 rounded-full bg-slate-800">0</span>
+      </button>
+
+      <!-- Proof of Work & Artifacts (NEW) -->
+      <button id="tag-artifacts" class="tool-tag-pill flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition border cursor-pointer">
+        <i data-lucide="cpu" class="w-3 h-3 text-purple-400"></i>
+        <span>Proof of Work</span>
+      </button>
+
+      <!-- Tasks -->
+      <button id="tag-tasks" class="tool-tag-pill flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition border cursor-pointer">
+        <i data-lucide="check-square" class="w-3 h-3 text-slate-400"></i>
+        <span>Tasks</span>
+        <span id="tag-badge-tasks" class="text-[10px] font-mono px-1 rounded-full bg-slate-800">0</span>
+      </button>
+
+      <!-- Comms -->
+      <button id="tag-comms" class="tool-tag-pill flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition border cursor-pointer">
+        <i data-lucide="message-square" class="w-3 h-3 text-slate-400"></i>
+        <span>Comms</span>
+      </button>
+    </div>
+
+    <!-- Active Tools Workpads Container -->
+    <div id="cockpit-tools-container" class="flex-1 overflow-y-auto p-4 space-y-4">
+      <!-- In-cockpit active tools render here -->
+    </div>
+
+    <!-- Cockpit Footer Quick Actions -->
+    <div class="p-3 border-t border-slate-800 bg-slate-900/90 flex items-center justify-between text-xs">
+      <div class="flex items-center gap-2">
+        <button id="cockpit-advance-stage" class="px-2.5 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 rounded font-medium transition flex items-center gap-1">
+          <i data-lucide="check" class="w-3.5 h-3.5"></i> Advance Stage
+        </button>
+        <button id="cockpit-open-aux-btn" class="px-2.5 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 rounded font-medium transition flex items-center gap-1">
+          <i data-lucide="split" class="w-3.5 h-3.5"></i> Open Left Panel
+        </button>
+      </div>
+      <span id="save-status" class="text-[11px] text-slate-500 font-mono">Saved to database</span>
+    </div>
+  </aside>
+
+  <!-- ================= TOAST NOTIFICATION CONTAINER ================= -->
+  <div id="toast" class="fixed bottom-5 left-6 px-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-xs text-slate-200 shadow-xl opacity-0 pointer-events-none transition-all duration-200 flex items-center gap-2 z-50">
+    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toast-msg">Action completed</span>
+  </div>
+
+  <!-- ================= APPLICATION SCRIPT ================= -->
+  <script>
+    // ================= CONSTANTS =================
+    const STAGES = [
+      { id: 'wishlist', name: 'Wishlist & Target', color: 'blue' },
+      { id: 'applied', name: 'Applied', color: 'indigo' },
+      { id: 'screening', name: 'Recruiter Screen', color: 'purple' },
+      { id: 'interview', name: 'Interview Loop', color: 'amber' },
+      { id: 'offer', name: 'Offer & Negotiation', color: 'emerald' },
+    ];
+    const STAGE_IDS = STAGES.map((s) => s.id);
+    const STAGE_DOT_CLASS = {
+      blue: 'bg-blue-400', indigo: 'bg-indigo-400', purple: 'bg-purple-400', amber: 'bg-amber-400', emerald: 'bg-emerald-400',
+    };
+
+    // Cockpit tools: dock order (tags) and workpad render order differ on purpose.
+    const COCKPIT_TOOLS = ['match', 'notes', 'artifacts', 'tasks', 'comms'];
+    const WORKPAD_ORDER = ['match', 'artifacts', 'notes', 'tasks', 'comms'];
+    const PROOF_STATUSES = ['planned', 'drafting', 'ready'];
+
+    const DEFAULT_JOB_DETAILS = { team: '', requirements: '', techStack: '', compensation: 'Set from the posting' };
+
+    // Shared class strings
+    const PILL_BASE = 'tool-tag-pill flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition border cursor-pointer';
+    const PILL_IDLE = 'bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700';
+    const PILL_ACTIVE = {
+      blue: 'bg-blue-600/30 text-blue-300 border-blue-500/60 shadow-sm',
+      red: 'bg-red-600/30 text-red-300 border-red-500/60 shadow-sm',
+      emerald: 'bg-emerald-600/30 text-emerald-300 border-emerald-500/60 shadow-sm',
+    };
+    const AUX_TAB_BASE = 'flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border';
+    const AUX_TAB_IDLE = 'bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700';
+    const AUX_TABS = {
+      browser: { button: 'tab-btn-browser', view: 'aux-browser-view', active: 'bg-blue-600/20 text-blue-300 border-blue-500/40' },
+      gmail: { button: 'tab-btn-gmail', view: 'aux-gmail-view', active: 'bg-red-600/20 text-red-300 border-red-500/40' },
+    };
+    const WORKPAD_CLASS = 'bg-slate-950/60 border border-slate-800 rounded-xl p-3.5 space-y-3';
+    const INPUT_CLASS = 'bg-slate-800 border border-slate-700 rounded-md px-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-1';
+
+    const GMAIL_TARGET_BASE = 'px-2.5 py-1 text-[11px] rounded font-medium';
+    const GMAIL_TARGET_IDLE = 'bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700';
+    const GMAIL_TARGETS = {
+      hm: {
+        button: 'btn-target-hm',
+        active: 'bg-purple-600/30 text-purple-300 border border-purple-500/50',
+        badge: 'Hiring Manager (Direct)',
+        badgeClass: 'bg-purple-950/80 border border-purple-800/60 text-purple-300',
+        template: 'backchannel',
+      },
+      recruiter: {
+        button: 'btn-target-recruiter',
+        active: 'bg-emerald-600/30 text-emerald-300 border border-emerald-500/50',
+        badge: 'Recruiter',
+        badgeClass: 'bg-emerald-950/80 border border-emerald-800/60 text-emerald-300',
+        template: 'followup',
+      },
+    };
+
+    // ================= STATE =================
+    const state = {
+      opportunities: [],
+      profile: null,
+      selectedOppId: null,
+      searchQuery: '',
+      stageFilter: 'all',
+      isAuxWorkspaceOpen: false,
+      currentAuxTab: 'browser',
+      currentGmailTarget: 'hm', // 'hm' | 'recruiter'
+      currentTemplate: 'backchannel',
+      draftDirty: false, // true once the user edits the draft by hand
+      toolDock: { match: true, notes: false, artifacts: false, tasks: false, comms: false },
+    };
+
+    // ================= HELPERS =================
+    const $ = (id) => document.getElementById(id);
+
+    const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+    function esc(value) {
+      return String(value ?? '').replace(/[&<>"']/g, (ch) => HTML_ESCAPES[ch]);
+    }
+
+    // Only http(s) links are ever put in an href or opened; anything else (javascript:, data:) is dropped.
+    function safeUrl(raw) {
+      const value = String(raw ?? '').trim();
+      if (!value) return '';
+      try {
+        const url = new URL(/^[a-z][a-z0-9+.-]*:/i.test(value) ? value : `https://${value}`);
+        return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : '';
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function getSelectedOpp() {
+      return state.opportunities.find((o) => o.id === state.selectedOppId);
+    }
+
+    function byOrderIndex(a, b) {
+      return a.orderIndex - b.orderIndex;
+    }
+
+    function matchLabel(opp) {
+      return opp.matchScore > 0 ? `${opp.matchScore}% MATCH` : 'UNSCORED';
+    }
+
+    function details(opp) {
+      return { ...DEFAULT_JOB_DETAILS, ...opp.jobDetails };
+    }
+
+    // Coalesces the many render passes in one event into a single icon scan.
+    let iconRefreshQueued = false;
+    function refreshIcons() {
+      if (iconRefreshQueued) return;
+      iconRefreshQueued = true;
+      queueMicrotask(() => {
+        iconRefreshQueued = false;
+        if (window.lucide) lucide.createIcons();
+      });
+    }
+
+    let toastTimer = null;
+    function showToast(msg, isError = false) {
+      const toast = $('toast');
+      $('toast-msg').textContent = msg;
+      toast.classList.toggle('border-red-500', isError);
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), isError ? 4500 : 2500);
+    }
+
+    // ================= API =================
+    let pendingSaves = 0;
+    function setSaveStatus(text, isError = false) {
+      const el = $('save-status');
+      el.textContent = text;
+      el.className = `text-[11px] font-mono ${isError ? 'text-red-400' : 'text-slate-500'}`;
+    }
+
+    // Every write goes through here so a failed save is visible instead of silently lost.
+    async function api(method, url, payload) {
+      pendingSaves++;
+      if (method !== 'GET') setSaveStatus('Saving…');
+      try {
+        const res = await fetch(url, {
+          method,
+          headers: payload === undefined ? {} : { 'Content-Type': 'application/json' },
+          body: payload === undefined ? undefined : JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `HTTP ${res.status}`);
+        if (--pendingSaves === 0 && method !== 'GET') setSaveStatus('Saved to database');
+        return await res.json();
+      } catch (err) {
+        pendingSaves--;
+        setSaveStatus('Not saved', true);
+        showToast(`Could not save: ${err.message}. Is the server running?`, true);
+        return null;
+      }
+    }
+
+    // Field edits are coalesced per opportunity so typing sends one PATCH, not one per key.
+    const saveQueue = new Map();
+    function saveOpp(opp, fields) {
+      const entry = saveQueue.get(opp.id) || { fields: {}, timer: null };
+      Object.assign(entry.fields, fields);
+      clearTimeout(entry.timer);
+      entry.timer = setTimeout(() => flushSave(opp.id), 400);
+      saveQueue.set(opp.id, entry);
+    }
+    function flushSave(oppId) {
+      const entry = saveQueue.get(oppId);
+      if (!entry) return;
+      saveQueue.delete(oppId);
+      clearTimeout(entry.timer);
+      api('PATCH', `/api/opportunities/${encodeURIComponent(oppId)}`, entry.fields);
+    }
+    function flushAllSaves() {
+      [...saveQueue.keys()].forEach(flushSave);
+    }
+    window.addEventListener('pagehide', flushAllSaves);
+
+    // Re-render everything that depends on the selected opportunity.
+    function refreshSelectedViews() {
+      updateToolTags();
+      renderToolWorkpads();
+      renderBoard();
+    }
+
+    async function loadOpportunities() {
+      const data = await fetch('/api/opportunities').then((r) => (r.ok ? r.json() : null)).catch(() => null);
+      if (!data) {
+        $('board-container').innerHTML = '<div class="m-auto text-sm text-slate-400">Server not reachable. Start it with <span class="font-mono text-emerald-400">./run.sh</span> and reload.</div>';
+        return;
+      }
+      state.opportunities = data;
+      renderBoard();
+    }
+
+    async function loadProfile() {
+      const profile = await fetch('/api/profile').then((r) => (r.ok ? r.json() : null)).catch(() => null);
+      if (!profile) return;
+      state.profile = profile;
+      $('gmail-from').textContent = profile.email || `${profile.name} (add email in profile.local.json)`;
+    }
+
+    // ================= STATE 1: ALL OPPORTUNITY BOARD =================
+    function matchesSearch(opp, q) {
+      if (!q) return true;
+      return [opp.title, opp.company, opp.contactName, opp.hiringManagerName]
+        .some((field) => field && field.toLowerCase().includes(q));
+    }
+
+    function renderCard(opp, index, stageId) {
+      const isSelected = opp.id === state.selectedOppId;
+      const cardClass = isSelected
+        ? 'bg-emerald-950/30 border-emerald-500/80 shadow-lg shadow-emerald-950/40 ring-1 ring-emerald-500/40'
+        : 'bg-slate-850/80 hover:bg-slate-800/90 border-slate-700/60 hover:border-slate-600';
+      const scored = opp.matchScore > 0;
+      const proof = opp.proofOfWork || {};
+
+      return `
+        <div class="group relative p-3.5 rounded-lg border transition cursor-pointer select-none ${cardClass}" data-opp-id="${esc(opp.id)}" data-stage-id="${stageId}">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] uppercase font-mono font-semibold tracking-wider text-emerald-400">${esc(opp.company)}</span>
+                <span class="text-[9px] font-mono px-1.5 rounded border font-bold ${scored ? 'bg-emerald-950 border-emerald-800/70 text-emerald-300' : 'bg-slate-800 border-slate-700 text-slate-400'}">
+                  ${esc(matchLabel(opp))}
+                </span>
+              </div>
+              <h4 class="font-medium text-xs text-slate-100 group-hover:text-emerald-300 transition-colors leading-snug mt-0.5">
+                ${esc(opp.title)}
+              </h4>
+            </div>
+            <button title="Delete application" data-action="delete" class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-400 p-1 rounded hover:bg-slate-700/50 transition">
+              <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
+          <div class="mt-2.5 flex items-center justify-between text-xs">
+            <span class="font-mono text-emerald-400 font-medium">$${Number(opp.value).toLocaleString()}</span>
+            <span class="text-[11px] text-slate-400 truncate max-w-[120px]">${esc(opp.location)}</span>
+          </div>
+
+          <div class="mt-2 flex items-center gap-1.5 text-[10px] text-slate-400 flex-wrap">
+            ${proof.status === 'ready' ? `
+              <span class="flex items-center gap-1 bg-purple-950/70 text-purple-300 px-1.5 py-0.5 rounded border border-purple-800/60">
+                <i data-lucide="cpu" class="w-3 h-3 text-purple-400"></i> Proof ready
+              </span>` : ''}
+            ${opp.notes.length > 0 ? `
+              <span class="flex items-center gap-1 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700/50">
+                <i data-lucide="award" class="w-3 h-3 text-amber-400"></i> ${opp.notes.length} stories
+              </span>` : ''}
+            ${opp.hiringManagerName ? `
+              <span class="flex items-center gap-1 bg-blue-950/70 text-blue-300 px-1.5 py-0.5 rounded border border-blue-800/60">
+                <i data-lucide="user-check" class="w-3 h-3 text-blue-400"></i> HM mapped
+              </span>` : ''}
+          </div>
+
+          <div class="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+            <div class="flex items-center gap-1">
+              <button title="Move up" data-action="move-up" class="hover:text-slate-200 px-1 hover:bg-slate-700/60 rounded text-[10px]">▲</button>
+              <button title="Move down" data-action="move-down" class="hover:text-slate-200 px-1 hover:bg-slate-700/60 rounded text-[10px]">▼</button>
+              <span class="text-[10px] text-slate-500 font-mono ml-0.5">#${index + 1}</span>
+            </div>
+            <span class="text-[11px] text-emerald-400 group-hover:underline flex items-center gap-1">
+              <span>Open cockpit</span>
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderColumn(stage, stageOpps, stageSum) {
+      const cards = stageOpps.length === 0
+        ? '<div class="h-28 rounded-lg border border-dashed border-slate-800/70 flex flex-col items-center justify-center text-xs text-slate-500"><span>No applications</span></div>'
+        : stageOpps.map((opp, index) => renderCard(opp, index, stage.id)).join('');
+
+      return `
+        <div class="w-80 flex-shrink-0 flex flex-col bg-slate-900/40 border border-slate-800/80 rounded-xl p-3.5 backdrop-blur-sm">
+          <div class="flex items-center justify-between pb-3 mb-2.5 border-b border-slate-800/80">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full ${STAGE_DOT_CLASS[stage.color] || 'bg-emerald-400'}"></span>
+              <span class="font-semibold text-xs tracking-wide uppercase text-slate-200">${esc(stage.name)}</span>
+              <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800/80 text-slate-400 font-mono">${stageOpps.length}</span>
+            </div>
+            <span class="text-xs font-mono text-slate-400">$${(stageSum / 1000).toFixed(0)}k</span>
+          </div>
+          <div class="cards-list flex-1 overflow-y-auto space-y-2.5 pr-1">${cards}</div>
+        </div>
+      `;
+    }
+
+    function renderBoard() {
+      const q = state.searchQuery.toLowerCase();
+      let totalTargetVal = 0;
+
+      const columns = STAGES
+        .filter((stage) => state.stageFilter === 'all' || stage.id === state.stageFilter)
+        .map((stage) => {
+          const stageOpps = state.opportunities
+            .filter((opp) => opp.stageId === stage.id && matchesSearch(opp, q))
+            .sort(byOrderIndex);
+          const stageSum = stageOpps.reduce((sum, opp) => sum + Number(opp.value), 0);
+          totalTargetVal += stageSum;
+          return renderColumn(stage, stageOpps, stageSum);
+        });
+
+      $('board-container').innerHTML = columns.join('');
+      $('pipeline-total-val').textContent = `$${(totalTargetVal / 1000).toFixed(0)}k Target Pipeline`;
+      refreshIcons();
+    }
+
+    // Single delegated listener for every card on the board.
+    function onBoardClick(e) {
+      const card = e.target.closest('[data-opp-id]');
+      if (!card) return;
+      const { oppId, stageId } = card.dataset;
+      const action = e.target.closest('[data-action]')?.dataset.action;
+
+      if (action === 'delete') deleteOpportunity(oppId);
+      else if (action === 'move-up') reorderOpportunity(oppId, stageId, 'up');
+      else if (action === 'move-down') reorderOpportunity(oppId, stageId, 'down');
+      else openCockpit(oppId);
+    }
+
+    function deleteOpportunity(id) {
+      const opp = state.opportunities.find((o) => o.id === id);
+      if (!opp || !confirm(`Delete "${opp.company} — ${opp.title}" and all its notes, tasks and comms?`)) return;
+      state.opportunities = state.opportunities.filter((o) => o.id !== id);
+      saveQueue.delete(id);
+      if (state.selectedOppId === id) closeCockpit(); // also re-renders the board
+      else renderBoard();
+      showToast(`Deleted "${opp.company}"`);
+      api('DELETE', `/api/opportunities/${encodeURIComponent(id)}`);
+    }
+
+    function reorderOpportunity(id, stageId, direction) {
+      const stageOpps = state.opportunities.filter((o) => o.stageId === stageId).sort(byOrderIndex);
+      const currIdx = stageOpps.findIndex((o) => o.id === id);
+      if (currIdx === -1) return;
+
+      const targetIdx = direction === 'up' ? currIdx - 1 : currIdx + 1;
+      if (targetIdx < 0 || targetIdx >= stageOpps.length) return;
+
+      const current = stageOpps[currIdx];
+      const target = stageOpps[targetIdx];
+      const moved = [current.orderIndex, target.orderIndex];
+      [current.orderIndex, target.orderIndex] = [target.orderIndex, current.orderIndex];
+      // Equal indexes would make the swap a no-op; nudge the moved card past its neighbour.
+      if (current.orderIndex === target.orderIndex) current.orderIndex += direction === 'up' ? -50 : 50;
+
+      renderBoard();
+      showToast(`Reordered "${current.company}" priority`);
+      // Persist both cards so the order survives a reload.
+      api('POST', '/api/opportunities/reorder', { opportunityId: current.id, newStageId: stageId, newOrderIndex: current.orderIndex });
+      if (moved[0] !== moved[1]) {
+        api('POST', '/api/opportunities/reorder', { opportunityId: target.id, newStageId: stageId, newOrderIndex: target.orderIndex });
+      }
+    }
+
+    // ================= STATE 2: SINGLE OPPORTUNITY COCKPIT =================
+    function openCockpit(oppId) {
+      const opp = state.opportunities.find((o) => o.id === oppId);
+      if (!opp) return;
+      flushAllSaves();
+      state.selectedOppId = oppId;
+
+      $('current-state-label').textContent = `State 2: ${opp.company} — ${opp.title}`;
+      $('cockpit-drawer').classList.remove('hidden');
+      renderCockpitHeader(opp);
+
+      $('cockpit-company').value = opp.company || '';
+      $('cockpit-title-input').value = opp.title || '';
+      $('cockpit-stage-select').value = opp.stageId;
+      $('cockpit-value-input').value = opp.value;
+      $('cockpit-hm-name').value = opp.hiringManagerName || '';
+      $('cockpit-hm-email').value = opp.hiringManagerEmail || '';
+      $('cockpit-contact-name').value = opp.contactName || '';
+      $('cockpit-contact-email').value = opp.contactEmail || '';
+
+      $('aux-company-name').textContent = opp.company;
+      $('browser-url-input').value = opp.jobUrl || '';
+
+      renderBrowserContent(opp);
+      state.draftDirty = false;
+      if (state.isAuxWorkspaceOpen && state.currentAuxTab === 'gmail') setGmailTarget(state.currentGmailTarget);
+      refreshSelectedViews();
+    }
+
+    function renderCockpitHeader(opp) {
+      $('cockpit-title').textContent = `${opp.company} — ${opp.title}`;
+      const pill = $('cockpit-match-pill');
+      pill.textContent = matchLabel(opp);
+      pill.className = `text-[11px] font-mono px-2 py-0.5 rounded-full border font-bold ${opp.matchScore > 0 ? 'bg-emerald-950 border-emerald-700 text-emerald-400' : 'bg-slate-800 border-slate-600 text-slate-400'}`;
+      $('aux-company-name').textContent = opp.company;
+      $('current-state-label').textContent = `State 2: ${opp.company} — ${opp.title}`;
+    }
+
+    function closeCockpit() {
+      flushAllSaves();
+      state.selectedOppId = null;
+      $('current-state-label').textContent = 'State 1: All Opportunity Board';
+      $('cockpit-drawer').classList.add('hidden');
+      closeAuxWorkspace();
+      renderBoard();
+    }
+
+    // ================= AUXILIARY WORKSPACE (LEFT OF COCKPIT) =================
+    function openAuxWorkspace(tab = 'browser') {
+      state.isAuxWorkspaceOpen = true;
+      state.currentAuxTab = tab;
+      $('aux-workspace').classList.remove('hidden');
+      updateAuxTabs();
+    }
+
+    function closeAuxWorkspace() {
+      state.isAuxWorkspaceOpen = false;
+      $('aux-workspace').classList.add('hidden');
+      updateToolTags();
+    }
+
+    function toggleAuxWorkspace(tab) {
+      if (state.isAuxWorkspaceOpen && state.currentAuxTab === tab) closeAuxWorkspace();
+      else openAuxWorkspace(tab);
+    }
+
+    function selectAuxTab(tab) {
+      state.currentAuxTab = tab;
+      updateAuxTabs();
+    }
+
+    function updateAuxTabs() {
+      Object.entries(AUX_TABS).forEach(([tab, cfg]) => {
+        const isActive = tab === state.currentAuxTab;
+        $(cfg.button).className = `${AUX_TAB_BASE} ${isActive ? cfg.active : AUX_TAB_IDLE}`;
+        $(cfg.view).classList.toggle('hidden', !isActive);
+      });
+      // Refresh an untouched draft so it reflects contact edits made in the cockpit.
+      if (state.currentAuxTab === 'gmail' && !state.draftDirty && getSelectedOpp()) setGmailTarget(state.currentGmailTarget);
+      updateToolTags();
+    }
+
+    function renderBrowserContent(opp) {
+      const d = details(opp);
+      const isTemplate = d.isTemplate === true;
+
+      $('browser-content').innerHTML = `
+        <div class="max-w-3xl mx-auto space-y-6">
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl">
+            <div class="pb-4 border-b border-slate-800">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-mono uppercase tracking-wider text-blue-400">${esc(opp.company)}</span>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 font-bold">${esc(matchLabel(opp))}</span>
+              </div>
+              <h2 class="text-xl font-bold text-white mt-1">${esc(opp.title)}</h2>
+              <div class="flex items-center gap-3 mt-2 text-xs text-slate-400">
+                <span class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-500"></i> ${esc(opp.location || 'Location not set')}</span>
+                ${d.team ? `<span class="flex items-center gap-1"><i data-lucide="users" class="w-3.5 h-3.5 text-slate-500"></i> ${esc(d.team)}</span>` : ''}
+              </div>
+            </div>
+
+            ${isTemplate ? `
+              <div class="mt-4 p-3 bg-amber-950/30 border border-amber-800/50 rounded-lg text-[11px] text-amber-200 leading-relaxed">
+                This is a template for the role type, not the real posting. Paste the posting below and press Analyze to score it against your verified background.
+              </div>` : ''}
+
+            <div class="mt-5 space-y-2 text-xs text-slate-300">
+              <h3 class="text-xs font-semibold uppercase tracking-wider text-blue-400">Job description</h3>
+              <textarea id="job-text" rows="12" class="w-full bg-slate-950/70 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 leading-relaxed focus:outline-none focus:ring-1 focus:ring-blue-500 resize-y select-text" placeholder="Paste the full job description here">${esc(d.requirements)}</textarea>
+              <div class="flex items-center gap-2">
+                <button data-action="analyze" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-xs font-medium flex items-center gap-1.5 transition">
+                  <i data-lucide="target" class="w-3.5 h-3.5"></i> Analyze &amp; Score
+                </button>
+                <span class="text-[11px] text-slate-500">Scores only what your resume supports. Gaps get an honest answer, not a bluff.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      refreshIcons();
+    }
+
+    async function analyzePosting() {
+      const opp = getSelectedOpp();
+      if (!opp) return;
+      const textarea = $('job-text');
+      const text = textarea ? textarea.value : '';
+      const result = await api('POST', `/api/opportunities/${encodeURIComponent(opp.id)}/analyze`, { text });
+      if (!result) return;
+      if (opp.id !== state.selectedOppId) return;
+      opp.matchScore = result.matchScore;
+      opp.matchDetails = result.matchDetails;
+      opp.jobDetails = result.jobDetails;
+      state.toolDock.match = true;
+      renderCockpitHeader(opp);
+      renderBrowserContent(opp);
+      refreshSelectedViews();
+      showToast(result.matchScore > 0
+        ? `Scored ${result.matchScore}% with ${result.matchDetails.gaps.length} gap(s)`
+        : 'No requirements recognized. Paste more of the posting.');
+    }
+
+    // ================= GMAIL DRAFTING STUDIO =================
+    let draftToken = 0;
+    async function applyGmailTemplate(type, opp = getSelectedOpp()) {
+      if (!opp) return;
+      state.currentTemplate = type;
+      const token = ++draftToken;
+      const draft = await api('POST', '/api/ai/draft', { opportunityId: opp.id, template: type, target: state.currentGmailTarget });
+      if (!draft || token !== draftToken || opp.id !== state.selectedOppId) return; // a newer request won
+      $('gmail-to-input').value = draft.to;
+      $('gmail-subject-input').value = draft.subject;
+      $('gmail-body-textarea').value = draft.body;
+      state.draftDirty = false;
+      runAntiSlopCheck();
+    }
+
+    function setGmailTarget(target, opp = getSelectedOpp()) {
+      state.currentGmailTarget = target;
+      if (!opp) return;
+      Object.entries(GMAIL_TARGETS).forEach(([key, cfg]) => {
+        $(cfg.button).className = `${GMAIL_TARGET_BASE} ${key === target ? cfg.active : GMAIL_TARGET_IDLE}`;
+      });
+      const cfg = GMAIL_TARGETS[target];
+      const badge = $('gmail-target-badge');
+      badge.textContent = cfg.badge;
+      badge.className = `text-[10px] font-mono px-2 py-0.5 rounded ${cfg.badgeClass}`;
+      applyGmailTemplate(cfg.template, opp);
+    }
+
+    // ================= ANTI-SLOP LINTER =================
+    let lintTimer = null;
+    let lintToken = 0;
+    function runAntiSlopCheck() {
+      clearTimeout(lintTimer);
+      lintTimer = setTimeout(async () => {
+        const text = $('gmail-body-textarea').value;
+        const token = ++lintToken;
+        const result = await fetch('/api/ai/anti-slop-linter', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }),
+        }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+        if (!result || token !== lintToken) return;
+
+        const scoreEl = $('authenticity-score');
+        const placeholders = (text.match(/\[[^\]]+\]/g) || []).length;
+        if (placeholders > 0) {
+          scoreEl.textContent = `Fill in ${placeholders} [bracketed] detail(s) before sending`;
+          scoreEl.className = 'font-mono text-amber-400 font-semibold';
+        } else if (result.flaggedCount === 0) {
+          scoreEl.textContent = 'No stock AI phrases found';
+          scoreEl.className = 'font-mono text-emerald-400 font-semibold';
+        } else {
+          scoreEl.textContent = `${result.flaggedCount} stock phrase(s): ${result.flagged.map((f) => `${f.buzzword} → ${f.suggestion}`).join(', ')}`;
+          scoreEl.className = 'font-mono text-amber-400 font-semibold';
+        }
+      }, 250);
+    }
+
+    function logComm(opp, type, title) {
+      const comm = {
+        id: 'c-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        type,
+        recipient: $('gmail-to-input').value.trim(),
+        title,
+        content: $('gmail-body-textarea').value,
+        time: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }),
+      };
+      opp.comms.unshift(comm);
+      api('POST', `/api/opportunities/${encodeURIComponent(opp.id)}/comms`, comm);
+      refreshSelectedViews();
+    }
+
+    function openInGmail() {
+      const opp = getSelectedOpp();
+      if (!opp) return;
+      const to = $('gmail-to-input').value.trim();
+      const subject = $('gmail-subject-input').value;
+      if (!to) return showToast('Add the recipient email in the cockpit first', true);
+      const url = 'https://mail.google.com/mail/?view=cm&fs=1' +
+        `&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent($('gmail-body-textarea').value)}`;
+      window.open(url, '_blank', 'noopener');
+      logComm(opp, 'email', `Opened in Gmail: "${subject}"`);
+      showToast('Opened in Gmail. Review it there, then send.');
+    }
+
+    function saveDraft() {
+      const opp = getSelectedOpp();
+      if (!opp) return;
+      logComm(opp, 'draft', `Draft: "${$('gmail-subject-input').value}"`);
+      showToast('Draft saved to comms history');
+    }
+
+    // ================= TOOL DOCK: TAG STATE VS USING STATE =================
+    function pillClass(isActive, color) {
+      return `${PILL_BASE} ${isActive ? PILL_ACTIVE[color] : PILL_IDLE}`;
+    }
+
+    function updateToolTags() {
+      const opp = getSelectedOpp();
+      if (!opp) return;
+
+      $('tag-badge-notes').textContent = opp.notes.length;
+      $('tag-badge-tasks').textContent = opp.tasks.filter((t) => !t.isCompleted).length;
+
+      const { isAuxWorkspaceOpen, currentAuxTab } = state;
+      $('tag-browser').className = pillClass(isAuxWorkspaceOpen && currentAuxTab === 'browser', 'blue');
+      $('tag-gmail').className = pillClass(isAuxWorkspaceOpen && currentAuxTab === 'gmail', 'red');
+      COCKPIT_TOOLS.forEach((tool) => { $(`tag-${tool}`).className = pillClass(state.toolDock[tool], 'emerald'); });
+    }
+
+    function toggleToolState(toolId) {
+      state.toolDock[toolId] = !state.toolDock[toolId];
+      updateToolTags();
+      renderToolWorkpads();
+    }
+
+    function workpadHeader(tool, icon, iconClass, title, titleClass = 'text-slate-200') {
+      return `
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800/80">
+          <span class="text-xs font-semibold ${titleClass} flex items-center gap-1.5">
+            <i data-lucide="${icon}" class="w-4 h-4 ${iconClass}"></i> ${title}
+          </span>
+          <button data-action="tuck-tool" data-tool="${tool}" class="text-[11px] text-slate-400 hover:text-slate-200 flex items-center gap-1 hover:bg-slate-800 px-2 py-0.5 rounded transition">
+            <span>Tuck Tag</span>
+            <i data-lucide="chevron-up" class="w-3 h-3"></i>
+          </button>
+        </div>
+      `;
+    }
+
+    function storyById(id) {
+      return state.profile && state.profile.stories.find((s) => s.id === id);
+    }
+
+    // 1. MATCH & GAP ANALYSIS
+    function renderMatchWorkpad(opp) {
+      const m = opp.matchDetails || {};
+      const strengths = m.strengths || [];
+      const gaps = m.gaps || [];
+      const isTemplate = details(opp).isTemplate === true;
+      const stories = (m.stories || []).map(storyById).filter(Boolean);
+      const header = workpadHeader('match', 'target', 'text-emerald-400', 'Match & Gap Analysis', 'text-emerald-300');
+
+      if (!strengths.length && !gaps.length) {
+        return `${header}<div class="text-xs text-slate-400 leading-relaxed">Not analyzed yet. Open the <b>Job Posting</b> panel, paste the description and press Analyze &amp; Score.
+          <button data-action="open-browser" class="mt-2 block px-2.5 py-1 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 rounded text-[11px]">Open Job Posting</button></div>`;
+      }
+
+      return `
+        ${header}
+        <div class="space-y-2.5 text-xs">
+          ${isTemplate ? '<div class="text-[11px] text-amber-300">Preview from the role template. Analyze the real posting for a score.</div>' : ''}
+          <div>
+            <span class="text-[10px] uppercase font-mono font-bold text-emerald-400 flex items-center gap-1">
+              <i data-lucide="check-circle" class="w-3 h-3"></i> Backed by your resume
+            </span>
+            <ul class="mt-1 space-y-1 pl-4 list-disc text-slate-300 text-[11px]">
+              ${strengths.map((s) => `<li>${esc(s)}</li>`).join('') || '<li class="text-slate-500">None recognized</li>'}
+            </ul>
+          </div>
+          <div class="p-2.5 rounded bg-amber-950/30 border border-amber-800/50">
+            <span class="text-[10px] uppercase font-mono font-bold text-amber-400 flex items-center gap-1">
+              <i data-lucide="alert-triangle" class="w-3 h-3"></i> Gaps and how to answer them
+            </span>
+            <ul class="mt-1 space-y-1.5 pl-4 list-disc text-[11px] text-slate-300 leading-relaxed">
+              ${gaps.map((g) => `<li>${esc(g)}</li>`).join('') || '<li class="text-slate-500">No gaps detected in this text</li>'}
+            </ul>
+          </div>
+          ${stories.length ? `
+            <div>
+              <span class="text-[10px] uppercase font-mono font-bold text-amber-400">Stories to lead with</span>
+              <div class="mt-1 space-y-1">
+                ${stories.map((s) => `
+                  <div class="flex items-center justify-between gap-2 p-1.5 rounded bg-slate-900 border border-slate-800">
+                    <span class="text-[11px] text-slate-200">${esc(s.title)}</span>
+                    <button data-action="add-story" data-story="${esc(s.id)}" class="text-[10px] px-2 py-0.5 rounded bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 whitespace-nowrap">Add</button>
+                  </div>`).join('')}
+              </div>
+            </div>` : ''}
+        </div>
+      `;
+    }
+
+    // 2. PROOF OF WORK
+    function renderArtifactsWorkpad(opp) {
+      const proof = opp.proofOfWork || {};
+      const link = safeUrl(proof.artifactUrl);
+      return `
+        ${workpadHeader('artifacts', 'cpu', 'text-purple-400', 'Proof of Work', 'text-purple-300')}
+        <div class="space-y-2 text-xs">
+          <p class="text-[11px] text-slate-500 leading-relaxed">A short plan or teardown sent with your note stands out more than a resume alone. Track it here; add the link once it exists.</p>
+          <input data-proof="artifactName" value="${esc(proof.artifactName || '')}" placeholder="e.g. 30-60-90 day plan" class="w-full ${INPUT_CLASS} focus:ring-purple-500">
+          <div class="flex gap-2">
+            <select data-proof="status" class="${INPUT_CLASS} focus:ring-purple-500">
+              ${PROOF_STATUSES.map((s) => `<option value="${s}" ${(proof.status || 'planned') === s ? 'selected' : ''}>${s}</option>`).join('')}
+            </select>
+            <input data-proof="artifactUrl" value="${esc(proof.artifactUrl || '')}" placeholder="Link (when ready)" class="flex-1 ${INPUT_CLASS} font-mono focus:ring-purple-500">
+          </div>
+          ${link ? `<a href="${esc(link)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded text-[11px] font-medium"><i data-lucide="external-link" class="w-3 h-3"></i> Open artifact</a>` : ''}
+        </div>
+      `;
+    }
+
+    // 3. STAR STORIES
+    function renderNotesWorkpad(opp) {
+      const bank = state.profile ? state.profile.stories : [];
+      return `
+        ${workpadHeader('notes', 'award', 'text-amber-400', 'STAR Stories & Notes')}
+        ${bank.length ? `
+          <div class="flex gap-2">
+            <select id="story-picker" class="flex-1 ${INPUT_CLASS} focus:ring-amber-500">
+              <option value="">Add from your story bank…</option>
+              ${bank.map((s) => `<option value="${esc(s.id)}">${esc(s.title)}</option>`).join('')}
+            </select>
+            <button data-action="add-story-picked" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-md text-xs font-medium transition">Add</button>
+          </div>` : ''}
+        <div class="flex gap-2">
+          <input type="text" id="input-new-note" placeholder="Write your own note or story…" class="flex-1 ${INPUT_CLASS} focus:ring-amber-500">
+          <button data-action="add-note" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-md text-xs font-medium transition flex items-center gap-1">
+            <i data-lucide="plus" class="w-3 h-3"></i> Add
+          </button>
+        </div>
+        <div class="space-y-2 max-h-72 overflow-y-auto pr-1">
+          ${opp.notes.length === 0 ? '<div class="text-xs text-slate-500 italic py-2">Nothing saved yet.</div>' : ''}
+          ${opp.notes.map((n) => `
+            <div class="p-2.5 rounded bg-slate-900 border border-slate-800 text-xs">
+              ${n.title ? `<div class="font-semibold text-amber-300 text-[11px] mb-1">${esc(n.title)}</div>` : ''}
+              <p class="text-slate-200 leading-relaxed whitespace-pre-line select-text">${esc(n.content)}</p>
+              <div class="text-[10px] text-slate-500 font-mono mt-1.5">${esc(n.time)}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // 4. TASKS
+    function renderTasksWorkpad(opp) {
+      return `
+        ${workpadHeader('tasks', 'check-square', 'text-emerald-400', 'Next Actions')}
+        <div class="flex gap-2">
+          <input type="text" id="input-new-task" placeholder="Add a follow-up or prep task…" class="flex-1 ${INPUT_CLASS} focus:ring-emerald-500">
+          <button data-action="add-task" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-xs font-medium transition flex items-center gap-1">
+            <i data-lucide="plus" class="w-3 h-3"></i> Add
+          </button>
+        </div>
+        <div class="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+          ${opp.tasks.map((t) => `
+            <div class="task-item flex items-center justify-between gap-2 p-2 rounded bg-slate-900 border border-slate-800 text-xs hover:border-slate-700 transition" data-task-id="${esc(t.id)}">
+              <label class="flex items-center gap-2 cursor-pointer flex-1">
+                <input type="checkbox" ${t.isCompleted ? 'checked' : ''} class="task-checkbox rounded border-slate-700 bg-slate-800 text-emerald-500 focus:ring-0">
+                <span class="${t.isCompleted ? 'line-through text-slate-500' : 'text-slate-200'}">${esc(t.title)}</span>
+              </label>
+              <button data-action="delete-task" title="Delete task" class="text-slate-500 hover:text-red-400 px-1">✕</button>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // 5. COMMS
+    function renderCommsWorkpad(opp) {
+      return `
+        ${workpadHeader('comms', 'message-square', 'text-purple-400', 'Outreach & Comms History')}
+        <button data-action="open-gmail" class="w-full py-2 bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/30 rounded text-xs font-medium flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="mail" class="w-3.5 h-3.5"></i> Open Gmail Studio
+        </button>
+        <div class="space-y-1.5 max-h-64 overflow-y-auto">
+          ${opp.comms.length === 0 ? '<div class="text-xs text-slate-500 italic py-1">No outreach logged yet.</div>' : ''}
+          ${opp.comms.map((c) => `
+            <div class="p-2 rounded bg-slate-900 border border-slate-800 text-xs flex items-center justify-between gap-2">
+              <div class="min-w-0">
+                <div class="text-slate-200 font-medium truncate">${esc(c.title)}</div>
+                <div class="text-[10px] text-slate-500 font-mono">${esc(c.time)} • To: ${esc(c.recipient || 'not set')}</div>
+              </div>
+              <span class="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700/50">${esc(c.type)}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    const WORKPAD_RENDERERS = {
+      match: renderMatchWorkpad, artifacts: renderArtifactsWorkpad, notes: renderNotesWorkpad,
+      tasks: renderTasksWorkpad, comms: renderCommsWorkpad,
+    };
+
+    function renderToolWorkpads() {
+      const opp = getSelectedOpp();
+      if (!opp) return;
+      $('cockpit-tools-container').innerHTML = WORKPAD_ORDER
+        .filter((tool) => state.toolDock[tool])
+        .map((tool) => `<div class="${WORKPAD_CLASS}">${WORKPAD_RENDERERS[tool](opp)}</div>`)
+        .join('');
+      refreshIcons();
+    }
+
+    // ================= WORKPAD ACTIONS =================
+    const newId = (prefix) => `${prefix}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+    const nowLabel = () => new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+
+    function takeInputValue(id) {
+      const input = $(id);
+      const value = input.value.trim();
+      if (value) input.value = '';
+      return value;
+    }
+
+    function saveNote(opp, note) {
+      opp.notes.unshift(note);
+      api('POST', `/api/opportunities/${encodeURIComponent(opp.id)}/notes`, note);
+      refreshSelectedViews();
+    }
+
+    function addNote(opp) {
+      const content = takeInputValue('input-new-note');
+      if (!content) return;
+      saveNote(opp, { id: newId('n-'), type: 'prep', title: 'My note', content, time: nowLabel() });
+      showToast('Note added');
+    }
+
+    function addStory(opp, storyId) {
+      const story = storyById(storyId);
+      if (!story) return;
+      if (opp.notes.some((n) => n.title === `STAR: ${story.title}`)) return showToast('That story is already here');
+      saveNote(opp, { id: newId('n-'), type: 'star_story', title: `STAR: ${story.title}`, content: story.text, time: nowLabel() });
+      state.toolDock.notes = true;
+      refreshSelectedViews();
+      showToast('Story added. Fill in the detail prompts in your own words.');
+    }
+
+    function addTask(opp) {
+      const title = takeInputValue('input-new-task');
+      if (!title) return;
+      const task = { id: newId('t-'), title, category: 'outreach', isCompleted: false };
+      opp.tasks.unshift(task);
+      api('POST', `/api/opportunities/${encodeURIComponent(opp.id)}/tasks`, task);
+      refreshSelectedViews();
+      showToast('Task added');
+    }
+
+    function deleteTask(opp, taskId) {
+      opp.tasks = opp.tasks.filter((t) => t.id !== taskId);
+      api('DELETE', `/api/tasks/${encodeURIComponent(taskId)}`);
+      refreshSelectedViews();
+    }
+
+    function onWorkpadClick(e) {
+      const el = e.target.closest('[data-action]');
+      const opp = getSelectedOpp();
+      if (!el || !opp) return;
+
+      switch (el.dataset.action) {
+        case 'tuck-tool': toggleToolState(el.dataset.tool); break;
+        case 'add-note': addNote(opp); break;
+        case 'add-task': addTask(opp); break;
+        case 'delete-task': deleteTask(opp, el.closest('[data-task-id]').dataset.taskId); break;
+        case 'add-story': addStory(opp, el.dataset.story); break;
+        case 'add-story-picked': addStory(opp, $('story-picker').value); break;
+        case 'open-gmail': openAuxWorkspace('gmail'); break;
+        case 'open-browser': openAuxWorkspace('browser'); break;
+      }
+    }
+
+    function onWorkpadChange(e) {
+      const opp = getSelectedOpp();
+      if (!opp) return;
+
+      if (e.target.matches('.task-checkbox')) {
+        const taskId = e.target.closest('[data-task-id]').dataset.taskId;
+        const task = opp.tasks.find((t) => t.id === taskId);
+        if (!task) return;
+        task.isCompleted = e.target.checked;
+        api('PATCH', `/api/tasks/${encodeURIComponent(taskId)}`, { isCompleted: task.isCompleted });
+        refreshSelectedViews();
+      } else if (e.target.dataset.proof) {
+        opp.proofOfWork = { ...opp.proofOfWork, [e.target.dataset.proof]: e.target.value.trim() };
+        saveOpp(opp, { proofOfWork: opp.proofOfWork });
+        renderBoard();
+        // The link button depends on the URL, so redraw only when that field changes.
+        if (e.target.dataset.proof === 'artifactUrl') renderToolWorkpads();
+      }
+    }
+
+    // ================= COCKPIT FORM =================
+    function withSelectedOpp(fn) {
+      return (e) => {
+        const opp = getSelectedOpp();
+        if (opp) fn(opp, e);
+      };
+    }
+
+    // Wires a text input to an opportunity field, saved (debounced) as the user types.
+    function bindField(id, field, { numeric = false, onChange } = {}) {
+      $(id).addEventListener('input', withSelectedOpp((opp, e) => {
+        opp[field] = numeric ? Number(e.target.value) || 0 : e.target.value;
+        saveOpp(opp, { [field]: opp[field] });
+        if (onChange) onChange(opp);
+      }));
+    }
+
+    async function createOpportunity() {
+      const opp = {
+        id: newId('job-'),
+        title: 'Role title',
+        company: 'Company',
+        location: '',
+        stageId: 'wishlist',
+        value: 150000,
+        contactName: '', contactEmail: '', hiringManagerName: '', hiringManagerEmail: '', jobUrl: '',
+        orderIndex: Date.now(),
+        matchScore: 0,
+        matchDetails: {},
+        proofOfWork: { artifactName: '30-60-90 day plan', artifactType: 'One-page plan', status: 'planned', artifactUrl: '' },
+        jobDetails: { team: '', requirements: '', techStack: '', compensation: 'Set from the posting', isTemplate: false },
+        notes: [], tasks: [], comms: [], files: [],
+      };
+      state.opportunities.unshift(opp);
+      openCockpit(opp.id);
+      showToast('Created. Set the company and role, then paste the posting.');
+      const { notes, tasks, comms, files, ...payload } = opp;
+      api('POST', '/api/opportunities', payload);
+    }
+
+    function changeStage(opp, stageId) {
+      opp.stageId = stageId;
+      $('cockpit-stage-select').value = stageId;
+      renderBoard();
+      saveOpp(opp, { stageId });
+      showToast(`Moved to ${STAGES.find((s) => s.id === stageId).name}`);
+    }
+
+    function advanceStage(opp) {
+      const next = STAGE_IDS[STAGE_IDS.indexOf(opp.stageId) + 1];
+      if (next) changeStage(opp, next);
+    }
+
+    function populateStageSelects() {
+      const options = STAGES.map((s) => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+      $('stage-filter').insertAdjacentHTML('beforeend', options);
+      $('cockpit-stage-select').innerHTML = options;
+    }
+
+    // ================= EVENT WIRING =================
+    function bindEvents() {
+      const on = (id, event, handler) => $(id).addEventListener(event, handler);
+
+      // Board
+      on('board-container', 'click', onBoardClick);
+      on('search-input', 'input', (e) => { state.searchQuery = e.target.value; renderBoard(); });
+      on('stage-filter', 'change', (e) => { state.stageFilter = e.target.value; renderBoard(); });
+      on('btn-add-opp', 'click', createOpportunity);
+
+      // Cockpit header & form
+      on('cockpit-close-btn', 'click', closeCockpit);
+      on('cockpit-delete-btn', 'click', () => { if (state.selectedOppId) deleteOpportunity(state.selectedOppId); });
+      on('cockpit-stage-select', 'change', withSelectedOpp((opp, e) => changeStage(opp, e.target.value)));
+      bindField('cockpit-company', 'company', { onChange: (opp) => { renderCockpitHeader(opp); renderBoard(); } });
+      bindField('cockpit-title-input', 'title', { onChange: (opp) => { renderCockpitHeader(opp); renderBoard(); } });
+      bindField('cockpit-value-input', 'value', { numeric: true, onChange: renderBoard });
+      bindField('cockpit-hm-name', 'hiringManagerName', { onChange: renderBoard });
+      bindField('cockpit-hm-email', 'hiringManagerEmail');
+      bindField('cockpit-contact-name', 'contactName');
+      bindField('cockpit-contact-email', 'contactEmail');
+      on('cockpit-advance-stage', 'click', withSelectedOpp(advanceStage));
+      on('cockpit-open-aux-btn', 'click', () => openAuxWorkspace(state.currentAuxTab));
+
+      // Tool dock
+      on('tag-browser', 'click', () => toggleAuxWorkspace('browser'));
+      on('tag-gmail', 'click', () => toggleAuxWorkspace('gmail'));
+      COCKPIT_TOOLS.forEach((tool) => on(`tag-${tool}`, 'click', () => toggleToolState(tool)));
+      on('cockpit-tools-container', 'click', onWorkpadClick);
+      on('cockpit-tools-container', 'change', onWorkpadChange);
+
+      // Aux workspace
+      on('tab-btn-browser', 'click', () => selectAuxTab('browser'));
+      on('tab-btn-gmail', 'click', () => selectAuxTab('gmail'));
+      on('btn-close-aux', 'click', closeAuxWorkspace);
+      on('btn-clip-job', 'click', analyzePosting);
+      on('browser-content', 'click', (e) => { if (e.target.closest('[data-action="analyze"]')) analyzePosting(); });
+      on('browser-url-input', 'input', withSelectedOpp((opp, e) => { opp.jobUrl = e.target.value.trim(); saveOpp(opp, { jobUrl: opp.jobUrl }); }));
+      on('btn-open-posting', 'click', () => {
+        const url = safeUrl($('browser-url-input').value);
+        if (url) window.open(url, '_blank', 'noopener');
+        else showToast('Paste a valid http(s) posting URL first', true);
+      });
+
+      // Gmail studio
+      on('btn-target-hm', 'click', () => setGmailTarget('hm'));
+      on('btn-target-recruiter', 'click', () => setGmailTarget('recruiter'));
+      document.querySelectorAll('.gmail-template-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          applyGmailTemplate(btn.dataset.template);
+          showToast(`Applied ${btn.textContent.trim()}`);
+        });
+      });
+      on('btn-run-antislop', 'click', runAntiSlopCheck);
+      on('gmail-body-textarea', 'input', () => { state.draftDirty = true; runAntiSlopCheck(); });
+      on('btn-gmail-send', 'click', openInGmail);
+      on('btn-gmail-save-draft', 'click', saveDraft);
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && state.selectedOppId) closeCockpit();
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      populateStageSelects();
+      bindEvents();
+      loadProfile().then(() => { if (getSelectedOpp()) refreshSelectedViews(); });
+      loadOpportunities();
+    });
+  </script>
+</body>
+</html>
