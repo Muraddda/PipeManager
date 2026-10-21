@@ -17,6 +17,25 @@ PRIMARY_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 FALLBACK_MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash"]
 
 
+def _candidate_models(api_key):
+    """Configured models first, then any flash models the key can actually use (per the models list API)."""
+    models = [PRIMARY_MODEL] + [m for m in FALLBACK_MODELS if m != PRIMARY_MODEL]
+    try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}&pageSize=100"
+        with urllib.request.urlopen(url, timeout=10) as response:
+            listed = json.loads(response.read().decode("utf-8")).get("models", [])
+        live = [
+            m["name"].split("/", 1)[1] for m in listed
+            if "generateContent" in m.get("supportedGenerationMethods", [])
+            and "flash" in m["name"] and "preview" not in m["name"] and "exp" not in m["name"]
+        ]
+        live.sort(reverse=True)
+        models = [m for m in models if m in live] + [m for m in live if m not in models]
+    except Exception:
+        pass
+    return models
+
+
 def get_api_key(profile=None):
     """Retrieve the Gemini API key from profile settings or environment."""
     if profile and profile.get("geminiApiKey"):
@@ -71,7 +90,7 @@ def _call_gemini(api_key, prompt, system_instruction=None, json_mode=False, time
         return None
 
     # Try primary model first, then fallbacks
-    models_to_try = [PRIMARY_MODEL] + [m for m in FALLBACK_MODELS if m != PRIMARY_MODEL]
+    models_to_try = _candidate_models(api_key)
     last_error = None
 
     for model in models_to_try:
@@ -100,7 +119,7 @@ def test_api_key(api_key):
     if not clean_key:
         return False, "Please enter an API key."
 
-    models_to_try = [PRIMARY_MODEL] + [m for m in FALLBACK_MODELS if m != PRIMARY_MODEL]
+    models_to_try = _candidate_models(clean_key)
 
     for model in models_to_try:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={clean_key}"
