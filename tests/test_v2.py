@@ -144,6 +144,35 @@ class ApiTests(unittest.TestCase):
         res.read()
         self.assertIsNone(res.getheader("Access-Control-Allow-Origin"))
 
+    def test_large_responses_are_gzipped_only_when_asked(self):
+        import gzip
+        host = {"Host": f"localhost:{self.port}"}
+        conn = http.client.HTTPConnection("127.0.0.1", self.port)
+        conn.request("GET", "/", headers={**host, "Accept-Encoding": "gzip"})
+        res = conn.getresponse()
+        packed = res.read()
+        self.assertEqual(res.getheader("Content-Encoding"), "gzip")
+        self.assertIn(b"Job Hunt Pipeline Studio V2", gzip.decompress(packed))
+        conn.request("GET", "/", headers=host)
+        res = conn.getresponse()
+        res.read()
+        self.assertIsNone(res.getheader("Content-Encoding"))
+
+    def test_connection_is_reused_and_error_closes_it(self):
+        conn = http.client.HTTPConnection("127.0.0.1", self.port)
+        host = {"Host": f"localhost:{self.port}"}
+        for _ in range(3):
+            conn.request("GET", "/api/profile", headers=host)
+            res = conn.getresponse()
+            res.read()
+            self.assertEqual(res.status, 200)
+        conn.request("POST", "/api/opportunities/job-1/tasks", body=b'{"title":"x"}',
+                     headers={**host, "Content-Type": "text/plain"})
+        res = conn.getresponse()
+        res.read()
+        self.assertEqual(res.status, 415)
+        self.assertEqual(res.getheader("Connection"), "close")
+
     def test_bad_json_is_400_not_500(self):
         self.assertEqual(self.call("POST", "/api/ai/anti-slop-linter", b"{nope")[0], 400)
 
