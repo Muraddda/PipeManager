@@ -9,17 +9,17 @@ import urllib.parse
 import candidate
 import db
 import drafts
+import gemini_service
 import linter
 import matcher
 
 PORT = int(os.environ.get("PORT", "8000"))
-BIND = os.environ.get("PIPELINE_BIND", "127.0.0.1")  # local tool: default never listens on the network
-# Extra Host headers to accept (comma-separated), e.g. a Tailscale name or 100.x address.
+BIND = os.environ.get("PIPELINE_BIND", "127.0.0.1")
 EXTRA_HOSTS = {h.strip().lower() for h in os.environ.get("PIPELINE_ALLOWED_HOSTS", "").split(",") if h.strip()}
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_FILES = {"/": "index.html", "/index.html": "index.html"}
 MAX_BODY = 1_000_000
-GZIP_MIN_BYTES = 1024  # below this, compression costs more than it saves
+GZIP_MIN_BYTES = 1024
 
 
 class ApiError(Exception):
@@ -59,11 +59,31 @@ def list_opportunities(conn, match, body):
 
 
 def get_profile(conn, match, body):
-    return candidate.public_profile(), 200
+    return db.get_profile_dict(conn), 200
+
+
+def update_profile(conn, match, body):
+    updated = db.update_profile_dict(conn, body)
+    return updated, 200
+
+
+def test_gemini_key(conn, match, body):
+    key = body.get("apiKey")
+    if not key:
+        prof = db.get_profile_dict(conn)
+        key = prof.get("geminiApiKey") or os.environ.get("GEMINI_API_KEY", "")
+    ok, msg = gemini_service.test_api_key(key)
+    return {"valid": ok, "message": msg}, 200 if ok else 400
 
 
 def anti_slop_linter(conn, match, body):
-    return linter.lint(body.get("text", "")), 200
+    text = body.get("text", "")
+    prof = db.get_profile_dict(conn)
+    if gemini_service.is_available(prof):
+        ai_lint = gemini_service.lint_text(text, prof)
+        if ai_lint:
+            return ai_lint, 200
+    return linter.lint(text), 200
 
 
 def draft_email(conn, match, body):
@@ -72,11 +92,12 @@ def draft_email(conn, match, body):
     template = body.get("template")
     if template not in drafts.TEMPLATES:
         raise ApiError(f"template must be one of {', '.join(drafts.TEMPLATES)}")
-    return drafts.build(opp, template, body.get("target", "hm")), 200
+    prof = db.get_profile_dict(conn)
+    return drafts.build(opp, template, body.get("target", "hm"), profile=prof), 200
 
 
 def analyze_opportunity(conn, match, body):
-    """Score the posting against the verified profile and store the result."""
+    """Score the posting against the candidate profile and store result."""
     opp_id = match.group(1)
     opp = db.get_opportunity(conn, opp_id)
     _found(opp)
@@ -85,7 +106,12 @@ def analyze_opportunity(conn, match, body):
     if isinstance(text, str) and text.strip():
         details["requirements"] = text.strip()
         details["isTemplate"] = False
-    result = matcher.analyze(details.get("requirements", ""), basis="template" if details.get("isTemplate") else "posting")
+    prof = db.get_profile_dict(conn)
+    result = matcher.analyze(
+        details.get("requirements", ""),
+        basis="template" if details.get("isTemplate") else "posting",
+        profile=prof
+    )
     analysis = {k: result[k] for k in ("basis", "strengths", "gaps", "matched", "stories")}
     db.update_opportunity(conn, opp_id, {"matchScore": result["score"], "matchDetails": analysis, "jobDetails": details})
     return {"matchScore": result["score"], "matchDetails": analysis, "jobDetails": details}, 200
@@ -93,13 +119,16 @@ def analyze_opportunity(conn, match, body):
 
 def create_opportunity(conn, match, body):
     opp_id = body.get("id") or _random_id("job-", 4)
+    prof = db.get_profile_dict(conn)
+    default_ote = prof.get("targetOte") or 150000
+
     record = {
         "id": opp_id,
-        "title": body.get("title") or "New Application",
-        "company": body.get("company") or "Company",
+        "title": body.get("title") or (prof.get("targetRole") or "New Application"),
+        "company": body.get("company") or "Target Company",
         "location": body.get("location", ""),
         "stage_id": _stage(body.get("stageId", "wishlist")),
-        "value": body.get("value", candidate.DEFAULT_TARGET_OTE),
+        "value": body.get("value", default_ote),
         "contact_name": body.get("contactName", ""),
         "contact_email": body.get("contactEmail", ""),
         "contact_role": body.get("contactRole", "Recruiter"),
@@ -172,10 +201,12 @@ def delete_task(conn, match, body):
     return {"success": True}, 200
 
 
-# (method, path pattern, handler). First match wins, so literal paths come before /<id> ones.
 ROUTES = [
     ("GET", r"/api/opportunities", list_opportunities),
     ("GET", r"/api/profile", get_profile),
+    ("PATCH", r"/api/profile", update_profile),
+    ("POST", r"/api/profile", update_profile),
+    ("POST", r"/api/ai/test-key", test_gemini_key),
     ("POST", r"/api/ai/anti-slop-linter", anti_slop_linter),
     ("POST", r"/api/ai/draft", draft_email),
     ("POST", r"/api/opportunities", create_opportunity),
@@ -202,17 +233,15 @@ def resolve(method, path):
 
 
 class PipelineHandler(http.server.BaseHTTPRequestHandler):
-    server_version = "JobPipeline/2"
-    protocol_version = "HTTP/1.1"  # keep-alive: one TCP/TLS setup per session instead of per request
+    server_version = "JobPipeline/2.5"
+    protocol_version = "HTTP/1.1"
 
     def _send(self, body, status, content_type, extra=None):
         if status >= 400:
-            # The request body may be unread (413, 415, 403), which would corrupt a reused connection.
             self.close_connection = True
             extra = {**(extra or {}), "Connection": "close"}
         headers = dict(extra or {})
         if len(body) >= GZIP_MIN_BYTES and "gzip" in self.headers.get("Accept-Encoding", "").lower():
-            # The board payload is repetitive JSON/HTML (about 2.2 MB -> 33 KB at 500 roles).
             body = gzip.compress(body, 5)
             headers["Content-Encoding"] = "gzip"
         headers["Vary"] = "Accept-Encoding"
@@ -233,7 +262,6 @@ class PipelineHandler(http.server.BaseHTTPRequestHandler):
             return {}
         if length > MAX_BODY:
             raise ApiError("Body too large", 413)
-        # Browsers send cross-site "simple" requests without a preflight only for these types.
         if not self.headers.get("Content-Type", "").lower().startswith("application/json"):
             raise ApiError("Content-Type must be application/json", 415)
         try:
@@ -245,7 +273,6 @@ class PipelineHandler(http.server.BaseHTTPRequestHandler):
         return body
 
     def _host_ok(self):
-        """Reject DNS-rebinding: only answer requests addressed to this machine."""
         host = (self.headers.get("Host") or "").rsplit(":", 1)[0].strip("[]").lower()
         return host in ("localhost", "127.0.0.1", "::1") or host in EXTRA_HOSTS
 
@@ -288,7 +315,7 @@ class PipelineHandler(http.server.BaseHTTPRequestHandler):
 
 
 def main():
-    db.init_db()
+    db.init_db(seed=False)
     server = http.server.ThreadingHTTPServer((BIND, PORT), PipelineHandler)
     print(f"Database ready. Serving on http://localhost:{PORT}")
     try:

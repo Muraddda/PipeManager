@@ -75,6 +75,24 @@ CREATE TABLE IF NOT EXISTS files (
     FOREIGN KEY (opportunity_id) REFERENCES opportunities (id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS profile (
+    id TEXT PRIMARY KEY DEFAULT 'default',
+    name TEXT NOT NULL,
+    email TEXT,
+    headline TEXT,
+    location TEXT,
+    target_role TEXT,
+    target_ote REAL DEFAULT 150000,
+    years_experience INTEGER DEFAULT 5,
+    background_summary TEXT,
+    skills_json TEXT,
+    stories_json TEXT,
+    gaps_json TEXT,
+    gemini_api_key TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Child lookups and board ordering run on every page load.
 CREATE INDEX IF NOT EXISTS idx_notes_opp ON notes (opportunity_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_opp ON tasks (opportunity_id);
@@ -85,7 +103,6 @@ CREATE INDEX IF NOT EXISTS idx_opps_order ON opportunities (order_index);
 
 STAGE_IDS = ("wishlist", "applied", "screening", "interview", "offer")
 
-# Insertable opportunity columns, in INSERT order.
 OPPORTUNITY_COLUMNS = (
     "id", "title", "company", "location", "stage_id", "value", "contact_name",
     "contact_email", "contact_role", "hiring_manager_name", "hiring_manager_email",
@@ -94,7 +111,6 @@ OPPORTUNITY_COLUMNS = (
 )
 JSON_COLUMNS = ("match_analysis_json", "proof_of_work_json", "job_details_json")
 
-# snake_case column -> camelCase API field, for columns that are renamed.
 OPPORTUNITY_API_FIELDS = {
     "stage_id": "stageId",
     "contact_name": "contactName",
@@ -112,7 +128,6 @@ JSON_API_FIELDS = {
     "job_details_json": "jobDetails",
 }
 
-# Fields a PATCH may change: API field -> column. JSON fields are replaced whole.
 PATCHABLE_FIELDS = {
     "stageId": "stage_id",
     "value": "value",
@@ -140,13 +155,12 @@ _INSERT_OPPORTUNITY_SQL = "INSERT INTO opportunities ({}) VALUES ({})".format(
 def get_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")  # needed for ON DELETE CASCADE
+    conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 
 @contextmanager
 def connect():
-    """Yield a connection that commits on success, rolls back on error and always closes."""
     conn = get_connection()
     try:
         yield conn
@@ -158,16 +172,75 @@ def connect():
         conn.close()
 
 
-def init_db():
+def init_default_profile(conn):
+    """Seed a clean, customizable starter profile if none exists."""
+    row = conn.execute("SELECT id FROM profile WHERE id = 'default'").fetchone()
+    if row:
+        return
+
+    skills = [
+        {"key": "sales", "label": "Pipeline & Prospecting", "evidence": "Demonstrated track record of outbound prospecting, discovery, and business acquisition."},
+        {"key": "closing", "label": "Discovery, Demos & Closing", "evidence": "Ran consultative discovery meetings, structured product demos, and closed new business against targets."},
+        {"key": "accounts", "label": "Client Relationship Management", "evidence": "Managed client accounts with high satisfaction, retention, and account expansion."},
+        {"key": "tools", "label": "CRM & Modern Tools", "evidence": "Proficient in CRM tools, pipeline forecasting, and structured follow-up routines."},
+    ]
+    stories = [
+        {
+            "id": "story-1",
+            "title": "Exceeded Revenue Quota",
+            "company": "Prior Role",
+            "role": "Top Performer",
+            "pitch": "Consistently outperformed quota through disciplined outbound prospecting and consultative discovery.",
+            "situation": "Target required ramping revenue and signing new clients in a competitive market.",
+            "task": "Build outbound momentum and secure high-value client commitments.",
+            "action": "Implemented structured discovery, mapped stakeholder needs, and tailored value propositions.",
+            "result": "Surpassed quarterly targets and expanded book of business.",
+            "prompts": ["What specific objection did you overcome?", "What was the measurable revenue impact?"]
+        }
+    ]
+
+    conn.execute(
+        """
+        INSERT INTO profile (
+            id, name, email, headline, location, target_role, target_ote,
+            years_experience, background_summary, skills_json, stories_json,
+            gaps_json, gemini_api_key
+        ) VALUES ('default', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            "Candidate",
+            "",
+            "Sales & Fintech Professional",
+            "New York, NY / Remote",
+            "Account Executive",
+            150000,
+            6,
+            "Experienced sales and fintech professional with proven track record in client acquisition, consultative advisory, and revenue growth.",
+            json.dumps(skills),
+            json.dumps(stories),
+            json.dumps([]),
+            "",
+        )
+    )
+
+
+def init_db(seed=False):
+    """Initialize SQLite database with WAL and schema. Does not auto-seed fake opportunities."""
     with connect() as conn:
-        conn.execute("PRAGMA journal_mode = WAL")  # readers don't block the writer; persists in the file
+        conn.execute("PRAGMA journal_mode = WAL")
         conn.executescript(SCHEMA)
-        if conn.execute("SELECT count(*) FROM opportunities").fetchone()[0] == 0:
+        init_default_profile(conn)
+        # Clear legacy seeded demo records
+        conn.execute("DELETE FROM opportunities WHERE id IN ('job-1', 'job-2', 'job-3', 'job-4', 'job-5') OR company IN ('Toast', 'Block (Square)', 'Ramp', 'Brex', 'Stripe', 'Company', 'Target Company')")
+        conn.execute("DELETE FROM notes WHERE opportunity_id NOT IN (SELECT id FROM opportunities)")
+        conn.execute("DELETE FROM tasks WHERE opportunity_id NOT IN (SELECT id FROM opportunities)")
+        conn.execute("DELETE FROM comms WHERE opportunity_id NOT IN (SELECT id FROM opportunities)")
+        conn.execute("DELETE FROM files WHERE opportunity_id NOT IN (SELECT id FROM opportunities)")
+        if seed and conn.execute("SELECT count(*) FROM opportunities").fetchone()[0] == 0:
             seed_data(conn)
 
 
 def insert_opportunity(conn, record):
-    """Insert an opportunity given a dict keyed by column name."""
     values = [
         json.dumps(record[col]) if col in JSON_COLUMNS else record[col]
         for col in OPPORTUNITY_COLUMNS
@@ -184,16 +257,11 @@ def seed_data(conn):
     conn.executemany("INSERT INTO files (id, opportunity_id, name, type, size, url) VALUES (?, ?, ?, ?, ?, ?)", SEED_FILES)
 
 
-# ---------------------------------------------------------------------------
-# Reads
-# ---------------------------------------------------------------------------
-
 def _load_json(raw):
     return json.loads(raw) if raw else {}
 
 
 def _group_by_opportunity(conn, sql, transform=dict):
-    """Run a child-table query and group rows by their opportunity_id."""
     grouped = defaultdict(list)
     for row in conn.execute(sql):
         item = transform(row)
@@ -223,7 +291,6 @@ def _opportunity_to_api(row):
 
 
 def list_opportunities(conn):
-    """All opportunities with their notes, tasks, comms and files, in five queries."""
     notes = _group_by_opportunity(conn, "SELECT opportunity_id, id, type, title, content, created_at AS time FROM notes ORDER BY rowid DESC")
     tasks = _group_by_opportunity(conn, "SELECT opportunity_id, id, title, category, is_completed, due_date FROM tasks ORDER BY rowid DESC", _task_to_api)
     comms = _group_by_opportunity(conn, "SELECT opportunity_id, id, type, recipient, title, content, created_at AS time FROM comms ORDER BY rowid DESC")
@@ -251,11 +318,93 @@ def get_opportunity(conn, opp_id):
 
 
 # ---------------------------------------------------------------------------
+# Profile CRUD
+# ---------------------------------------------------------------------------
+
+def _mask_key(key):
+    if not key:
+        return ""
+    if len(key) <= 8:
+        return "••••••••"
+    return key[:4] + "••••" + key[-4:]
+
+
+def get_profile_dict(conn):
+    init_default_profile(conn)
+    row = conn.execute("SELECT * FROM profile WHERE id = 'default'").fetchone()
+    if not row:
+        return {}
+
+    raw_skills = _load_json(row["skills_json"])
+    raw_stories = _load_json(row["stories_json"])
+    raw_gaps = _load_json(row["gaps_json"])
+
+    env_key = os.environ.get("GEMINI_API_KEY", "")
+    key = row["gemini_api_key"] or env_key
+
+    return {
+        "name": row["name"],
+        "email": row["email"] or "",
+        "headline": row["headline"] or "",
+        "location": row["location"] or "",
+        "targetRole": row["target_role"] or "",
+        "targetOte": row["target_ote"] or 150000,
+        "yearsExperience": row["years_experience"] or 5,
+        "backgroundSummary": row["background_summary"] or "",
+        "skills": raw_skills if isinstance(raw_skills, list) else [],
+        "stories": raw_stories if isinstance(raw_stories, list) else [],
+        "gaps": raw_gaps if isinstance(raw_gaps, list) else [],
+        "hasGeminiKey": bool(key),
+        "geminiApiKeyMasked": _mask_key(key),
+        "geminiApiKey": row["gemini_api_key"] or "",
+    }
+
+
+def update_profile_dict(conn, updates):
+    init_default_profile(conn)
+    col_map = {
+        "name": "name",
+        "email": "email",
+        "headline": "headline",
+        "location": "location",
+        "targetRole": "target_role",
+        "targetOte": "target_ote",
+        "yearsExperience": "years_experience",
+        "backgroundSummary": "background_summary",
+        "geminiApiKey": "gemini_api_key",
+    }
+    json_map = {
+        "skills": "skills_json",
+        "stories": "stories_json",
+        "gaps": "gaps_json",
+    }
+
+    cols = []
+    vals = []
+    for field, col in col_map.items():
+        if field in updates:
+            cols.append(f"{col} = ?")
+            vals.append(updates[field])
+
+    for field, col in json_map.items():
+        if field in updates:
+            cols.append(f"{col} = ?")
+            vals.append(json.dumps(updates[field]))
+
+    if not cols:
+        return get_profile_dict(conn)
+
+    cols.append("updated_at = CURRENT_TIMESTAMP")
+    sql = f"UPDATE profile SET {', '.join(cols)} WHERE id = 'default'"
+    conn.execute(sql, vals)
+    return get_profile_dict(conn)
+
+
+# ---------------------------------------------------------------------------
 # Writes. Each returns True when a row was affected so handlers can answer 404.
 # ---------------------------------------------------------------------------
 
 def update_opportunity(conn, opp_id, changes):
-    """Apply a partial update from API-named fields; unknown fields are ignored."""
     columns = []
     for field, col in PATCHABLE_FIELDS.items():
         if field in changes:
@@ -303,17 +452,17 @@ def insert_comm(conn, comm_id, opp_id, comm_type, recipient, title, content, cre
                  (comm_id, opp_id, comm_type, recipient, title, content, created_at))
 
 
-def reset_db():
+def reset_db(seed=False):
     for suffix in ("", "-wal", "-shm"):
         if os.path.exists(DB_PATH + suffix):
             os.remove(DB_PATH + suffix)
-    init_db()
+    init_db(seed=seed)
 
 
 if __name__ == "__main__":
-    if "--reset" in sys.argv:
-        reset_db()
-        print("Database reset and reseeded at:", DB_PATH)
+    if "--reset" in sys.argv or "--seed" in sys.argv:
+        reset_db(seed="--seed" in sys.argv)
+        print("Database initialized at:", DB_PATH)
     else:
-        init_db()
-        print("Database ready at:", DB_PATH, "(pass --reset to wipe and reseed)")
+        init_db(seed=False)
+        print("Database ready at:", DB_PATH)
