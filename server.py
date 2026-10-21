@@ -12,7 +12,9 @@ import linter
 import matcher
 
 PORT = int(os.environ.get("PORT", "8000"))
-BIND = "127.0.0.1"  # local tool: never listen on the network
+BIND = os.environ.get("PIPELINE_BIND", "127.0.0.1")  # local tool: default never listens on the network
+# Extra Host headers to accept (comma-separated), e.g. a Tailscale name or 100.x address.
+EXTRA_HOSTS = {h.strip().lower() for h in os.environ.get("PIPELINE_ALLOWED_HOSTS", "").split(",") if h.strip()}
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_FILES = {"/": "index.html", "/index.html": "index.html"}
 MAX_BODY = 1_000_000
@@ -232,7 +234,7 @@ class PipelineHandler(http.server.BaseHTTPRequestHandler):
     def _host_ok(self):
         """Reject DNS-rebinding: only answer requests addressed to this machine."""
         host = (self.headers.get("Host") or "").rsplit(":", 1)[0].strip("[]").lower()
-        return host in ("localhost", "127.0.0.1", "::1")
+        return host in ("localhost", "127.0.0.1", "::1") or host in EXTRA_HOSTS
 
     def _serve_static(self, name):
         with open(os.path.join(BASE_DIR, name), "rb") as fh:
