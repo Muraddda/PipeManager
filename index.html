@@ -85,7 +85,7 @@
   <!-- ================= TOP APPLICATION HEADER ================= -->
   <header class="h-16 px-4 md:px-6 border-b border-slate-800/80 bg-slate-900/80 backdrop-blur flex items-center justify-between z-20 flex-shrink-0" role="banner">
     <div class="flex items-center gap-3 md:gap-5">
-      <div class="flex items-center gap-2.5">
+      <div class="hidden items-center gap-2.5">
         <div class="w-8 h-8 rounded-lg bg-emerald-600/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400" aria-hidden="true">
           <i data-lucide="shield-check" class="w-4 h-4"></i>
         </div>
@@ -103,7 +103,7 @@
       </div>
 
       <!-- State Indicator Badge -->
-      <div class="hidden xl:flex items-center gap-2 text-xs bg-slate-850 border border-slate-700/70 rounded-full px-3 py-1" role="status">
+      <div class="hidden items-center gap-2 text-xs bg-slate-850 border border-slate-700/70 rounded-full px-3 py-1" role="status">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true"></span>
         <span class="text-slate-200 font-medium" id="current-state-label">State 1: All Opportunity Board</span>
       </div>
@@ -573,11 +573,9 @@
      */
 
     const STAGES = [
-      { id: 'wishlist', name: 'Wishlist & Target', color: 'blue', border: 'border-blue-500/30' },
+      { id: 'wishlist', name: 'Targeted', color: 'blue', border: 'border-blue-500/30' },
       { id: 'applied', name: 'Applied', color: 'indigo', border: 'border-indigo-500/30' },
-      { id: 'screening', name: 'Recruiter Screen', color: 'purple', border: 'border-purple-500/30' },
       { id: 'interview', name: 'Interview Loop', color: 'amber', border: 'border-amber-500/30' },
-      { id: 'offer', name: 'Offer & Negotiation', color: 'emerald', border: 'border-emerald-500/30' },
     ];
     const STAGE_IDS = STAGES.map((s) => s.id);
 
@@ -1960,7 +1958,7 @@
       if (nextIdx < STAGE_IDS.length) {
         changeStage(opp, STAGE_IDS[nextIdx]);
       } else {
-        showToast('Application is already at final Offer & Negotiation stage');
+        showToast('Application is already at the final stage');
       }
     }
 
