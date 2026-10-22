@@ -7,9 +7,7 @@ import os
 import re
 import smtplib
 import sqlite3
-import ssl
 import urllib.parse
-import urllib.request
 
 import candidate
 import db
@@ -31,19 +29,6 @@ class ApiError(Exception):
     def __init__(self, message, status=400):
         super().__init__(message)
         self.status = status
-
-
-def _safe_urlopen(req, timeout=10):
-    """Open request with SSL fallback for macOS environments missing local cert bundles."""
-    try:
-        ctx = ssl.create_default_context()
-        return urllib.request.urlopen(req, timeout=timeout, context=ctx)
-    except urllib.error.URLError as err:
-        err_str = str(err)
-        if 'CERTIFICATE_VERIFY_FAILED' in err_str or 'certificate verify failed' in err_str:
-            unverified_ctx = ssl._create_unverified_context()
-            return urllib.request.urlopen(req, timeout=timeout, context=unverified_ctx)
-        raise
 
 
 def _random_id(prefix, num_bytes):
@@ -424,35 +409,6 @@ class PipelineHandler(http.server.BaseHTTPRequestHandler):
         path = urllib.parse.urlparse(self.path).path
         if method == "GET" and path in STATIC_FILES:
             return self._serve_static(STATIC_FILES[path])
-        if method == "GET" and path == "/api/proxy":
-            qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
-            target_url = qs.get("url", [""])[0]
-            if not target_url:
-                return self._send_json({"error": "url parameter required"}, 400)
-            if not target_url.startswith(("http://", "https://")):
-                target_url = "https://" + target_url
-            try:
-                req = urllib.request.Request(
-                    target_url,
-                    headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
-                )
-                with _safe_urlopen(req, timeout=8) as resp:
-                    content = resp.read()
-                    ctype = resp.headers.get("Content-Type", "text/html; charset=utf-8")
-                    if "text/html" in ctype:
-                        html = content.decode("utf-8", errors="replace")
-                        base_tag = f'<base href="{target_url}">'
-                        if "<head>" in html:
-                            html = html.replace("<head>", f"<head>{base_tag}", 1)
-                        elif "<HEAD>" in html:
-                            html = html.replace("<HEAD>", f"<HEAD>{base_tag}", 1)
-                        content = html.encode("utf-8")
-                    self._send(content, 200, ctype)
-                    return
-            except Exception as exc:
-                err_page = f"<!DOCTYPE html><html><body style='background:#0b1120;color:#94a3b8;font-family:sans-serif;padding:3rem 1.5rem;text-align:center;'><h3 style='color:#f8fafc;font-size:1.1rem;margin-bottom:0.5rem;'>Company Site Preview</h3><p style='font-size:0.85rem;color:#cbd5e1;margin-bottom:1rem;'>{target_url}</p><a href='{target_url}' target='_blank' style='display:inline-block;padding:0.5rem 1rem;background:#2563eb;color:#ffffff;text-decoration:none;border-radius:0.375rem;font-size:0.8rem;font-weight:600;'>Open Company Page in New Tab &rarr;</a></body></html>"
-                self._send(err_page.encode("utf-8"), 200, "text/html; charset=utf-8")
-                return
         handler, match = resolve(method, path)
         if handler is None:
             return self._send_json({"error": "Not found"}, 404)
