@@ -125,15 +125,12 @@
     <!-- Swimlanes injected here -->
   </main>
 
-  <!-- ================= AUXILIARY WORKSPACE: LEFT PANEL (BROWSER & GMAIL ONLY) ================= -->
+  <!-- ================= AUXILIARY WORKSPACE: LEFT PANEL (GMAIL ONLY) ================= -->
   <div id="aux-workspace" class="hidden fixed top-14 left-0 right-0 md:right-[530px] bottom-0 bg-slate-950/95 border-r border-slate-800 shadow-2xl z-30 flex flex-col animation-slide-in-left" role="dialog" aria-modal="false" aria-labelledby="aux-header-title">
     <div class="h-12 px-4 md:px-5 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between flex-shrink-0">
       <div class="flex items-center gap-2">
         <span id="aux-header-title" class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Tool:</span>
         <div role="tablist" aria-label="Auxiliary Workspace Tabs" class="flex items-center gap-1.5">
-          <button id="tab-btn-browser" role="tab" aria-selected="true" aria-controls="aux-browser-view" class="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border bg-blue-600/20 text-blue-300 border-blue-500/40 focus-visible:ring-2">
-            <i data-lucide="globe" class="w-3.5 h-3.5" aria-hidden="true"></i> Browser
-          </button>
           <button id="tab-btn-gmail" role="tab" aria-selected="false" aria-controls="aux-gmail-view" class="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border bg-slate-800 text-slate-300 hover:text-white border-slate-700 focus-visible:ring-2">
             <i data-lucide="mail" class="w-3.5 h-3.5" aria-hidden="true"></i> Gmail
           </button>
@@ -149,41 +146,7 @@
       </div>
     </div>
 
-    <!-- TAB 1: COMPANY BROWSER VIEW -->
-    <div id="aux-browser-view" role="tabpanel" aria-labelledby="tab-btn-browser" class="flex-1 flex flex-col overflow-hidden bg-slate-950">
-      <div class="h-11 px-3 md:px-4 border-b border-slate-800 bg-slate-900/80 flex items-center gap-2 flex-shrink-0">
-        <button id="btn-browser-reload" type="button" title="Reload page" class="p-1.5 text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded transition flex-shrink-0">
-          <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
-        </button>
-        <div class="flex-1 relative flex items-center">
-          <i data-lucide="globe" class="w-3.5 h-3.5 text-blue-400 absolute left-2.5 pointer-events-none" aria-hidden="true"></i>
-          <input
-            id="browser-url-input"
-            type="url"
-            placeholder="Company website URL (https://...)"
-            class="w-full bg-slate-950 border border-slate-700 rounded-md pl-8 pr-14 py-1 text-xs text-slate-200 font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-          <button id="btn-browser-go" type="button" class="absolute right-1 px-2.5 py-0.5 bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/40 rounded text-[11px] font-medium transition">
-            Go
-          </button>
-        </div>
-        <a id="btn-open-posting" href="#" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[11px] text-slate-300 hover:text-white border border-slate-700 flex items-center gap-1 transition flex-shrink-0" title="Open in new window">
-          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">Open Full Page</span>
-        </a>
-      </div>
-
-      <div class="flex-1 relative bg-slate-900 flex flex-col overflow-hidden">
-        <iframe
-          id="browser-iframe"
-          class="flex-1 w-full h-full border-0 bg-white"
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-          src="about:blank"
-        ></iframe>
-      </div>
-    </div>
-
-    <!-- TAB 2: GMAIL DRAFTING STUDIO -->
+    <!-- GMAIL DRAFTING STUDIO -->
     <div id="aux-gmail-view" role="tabpanel" aria-labelledby="tab-btn-gmail" class="hidden flex-1 flex flex-col overflow-hidden bg-slate-950">
       <div class="h-11 px-4 md:px-5 border-b border-slate-800 bg-slate-900/70 flex items-center justify-between flex-shrink-0">
         <div class="flex items-center gap-2">
@@ -303,7 +266,20 @@
     <!-- Scrollable Body with Company-Focused Sections -->
     <div class="flex-1 overflow-y-auto divide-y divide-slate-800/80">
       
-      <!-- 2. One line description of what the company does -->
+      <!-- 2. Company website -->
+      <section class="p-4 space-y-2 bg-slate-950/40" aria-label="Company Website">
+        <label for="cockpit-company-url" class="text-[10px] font-semibold tracking-wider text-slate-400 uppercase font-mono block">
+          Company website
+        </label>
+        <input
+          id="cockpit-company-url"
+          type="url"
+          placeholder="https://company.com"
+          class="w-full bg-slate-850 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-100 font-mono placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition"
+        />
+      </section>
+
+      <!-- 3. One line description of what the company does -->
       <section class="p-4 space-y-2 bg-slate-950/40" aria-label="Company Description">
         <label for="cockpit-company-desc" class="text-[10px] font-semibold tracking-wider text-slate-400 uppercase font-mono block">
           What the company does
@@ -316,7 +292,7 @@
         />
       </section>
 
-      <!-- 3. Points of contact: Name, role and togglable email/phone -->
+      <!-- 4. Points of contact: Name, role and togglable email/phone -->
       <section class="p-4 space-y-3 bg-slate-900/30" aria-label="Points of Contact">
         <div class="flex items-center justify-between">
           <span class="text-[10px] font-semibold tracking-wider text-slate-400 uppercase font-mono">
@@ -394,23 +370,23 @@
         </div>
       </section>
 
-      <!-- 5. Tools: Only keep Browser and Gmail -->
+      <!-- 5. Tools: Company site (new tab) and Gmail -->
       <section class="p-4 space-y-2.5 bg-slate-900/30" aria-label="Tools">
         <div class="flex items-center justify-between">
           <span class="text-[10px] font-semibold tracking-wider text-slate-400 uppercase font-mono flex items-center gap-1.5">
             <i data-lucide="layers" class="w-3 h-3 text-slate-400" aria-hidden="true"></i> Tools
           </span>
-          <span class="text-[10px] text-slate-400 font-mono">Browser &amp; Gmail</span>
+          <span class="text-[10px] text-slate-400 font-mono">Company site &amp; Gmail</span>
         </div>
 
         <div class="grid grid-cols-2 gap-2.5">
-          <button id="btn-open-browser-tool" type="button" class="flex items-center justify-center gap-2.5 p-3 rounded-lg border border-slate-700 bg-slate-850 hover:bg-slate-800 text-slate-200 hover:text-white transition group focus-visible:ring-2">
+          <button id="btn-open-company-site" type="button" class="flex items-center justify-center gap-2.5 p-3 rounded-lg border border-slate-700 bg-slate-850 hover:bg-slate-800 text-slate-200 hover:text-white transition group focus-visible:ring-2">
             <div class="w-7 h-7 rounded-md bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400 group-hover:scale-105 transition">
-              <i data-lucide="globe" class="w-4 h-4" aria-hidden="true"></i>
+              <i data-lucide="external-link" class="w-4 h-4" aria-hidden="true"></i>
             </div>
             <div class="text-left">
-              <span class="text-xs font-semibold block text-slate-200">Browser</span>
-              <span class="text-[10px] text-slate-400 block">Job &amp; Intel</span>
+              <span class="text-xs font-semibold block text-slate-200">Company site</span>
+              <span class="text-[10px] text-slate-400 block">Opens in new tab</span>
             </div>
           </button>
 
@@ -584,7 +560,7 @@
         searchQuery: '',
         stageFilter: 'all',
         isAuxOpen: false,
-        activeAuxTab: 'browser',
+        activeAuxTab: 'gmail',
         gmailTarget: 'hm',
         isLoading: true,
         lastFocusedElement: null,
@@ -916,7 +892,10 @@
       // Stage Select
       $('cockpit-stage-select').value = opp.stageId || 'targeted';
 
-      // 2. One line description of what the company does
+      // 2. Company website
+      $('cockpit-company-url').value = opp.jobUrl || '';
+
+      // 3. One line description of what the company does
       $('cockpit-company-desc').value = opp.companyDescription || '';
 
       // 3. Points of Contact
@@ -1111,8 +1090,8 @@
       refreshIcons();
     }
 
-    // ================= AUXILIARY WORKSPACE (BROWSER & GMAIL) =================
-    function openAuxWorkspace(tab = 'browser') {
+    // ================= AUXILIARY WORKSPACE (GMAIL) =================
+    function openAuxWorkspace(tab = 'gmail') {
       const opp = getSelectedOpp();
       if (!opp) {
         showToast('Select an opportunity first to open tools', true);
@@ -1134,29 +1113,13 @@
 
     function selectAuxTab(tab) {
       store.set({ activeAuxTab: tab });
-      const isBrowser = tab === 'browser';
-
-      $('aux-browser-view').classList.toggle('hidden', !isBrowser);
-      $('aux-gmail-view').classList.toggle('hidden', isBrowser);
-
-      $('tab-btn-browser').setAttribute('aria-selected', isBrowser);
-      $('tab-btn-browser').className = `flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border focus-visible:ring-2 ${
-        isBrowser ? 'bg-blue-600/20 text-blue-300 border-blue-500/40' : 'bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700'
-      }`;
-
-      $('tab-btn-gmail').setAttribute('aria-selected', !isBrowser);
-      $('tab-btn-gmail').className = `flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border focus-visible:ring-2 ${
-        !isBrowser ? 'bg-red-600/20 text-red-300 border-red-500/40' : 'bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700'
-      }`;
+      $('aux-gmail-view').classList.remove('hidden');
+      $('tab-btn-gmail').setAttribute('aria-selected', true);
 
       const opp = getSelectedOpp();
       if (opp) {
-        if (isBrowser) {
-          renderBrowserContent(opp);
-        } else {
-          setGmailTarget(store.state.gmailTarget);
-          if (!store.state.draftDirty) applyGmailTemplate('backchannel', opp);
-        }
+        setGmailTarget(store.state.gmailTarget);
+        if (!store.state.draftDirty) applyGmailTemplate('backchannel', opp);
       }
     }
 
@@ -1171,77 +1134,20 @@
       return '';
     }
 
-    function loadBrowserUrl(url) {
-      const iframe = $('browser-iframe');
-      const urlInput = $('browser-url-input');
-      const openBtn = $('btn-open-posting');
-      if (!iframe) return;
-
-      if (!url) {
-        iframe.src = 'about:blank';
-        if (openBtn) openBtn.href = '#';
+    function openCompanySite() {
+      const opp = getSelectedOpp();
+      if (!opp) {
+        showToast('Select an opportunity first', true);
         return;
       }
-
-      let targetUrl = url.trim();
-      if (!/^https?:\/\//i.test(targetUrl)) {
-        targetUrl = 'https://' + targetUrl;
+      const raw = getCompanyUrl(opp);
+      const url = safeUrl(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+      if (!raw || !url) {
+        showToast('Add the company website first', true);
+        $('cockpit-company-url').focus();
+        return;
       }
-
-      if (urlInput) urlInput.value = targetUrl;
-      if (openBtn) openBtn.href = targetUrl;
-
-      // Load company website through the proxy endpoint
-      iframe.src = `/api/proxy?url=${encodeURIComponent(targetUrl)}`;
-    }
-
-    function renderBrowserContent(opp) {
-      const url = getCompanyUrl(opp);
-      const urlInput = $('browser-url-input');
-      const openBtn = $('btn-open-posting');
-      const iframe = $('browser-iframe');
-
-      if (urlInput) urlInput.value = url;
-      if (openBtn) openBtn.href = url || '#';
-
-      if (url) {
-        loadBrowserUrl(url);
-      } else {
-        if (iframe) {
-          iframe.srcdoc = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset="utf-8">
-              <style>
-                body {
-                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                  background: #0b1120;
-                  color: #94a3b8;
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-                  justify-content: center;
-                  height: 100vh;
-                  margin: 0;
-                  text-align: center;
-                  padding: 2rem;
-                  box-sizing: border-box;
-                }
-                h3 { color: #f8fafc; font-size: 1.15rem; margin-bottom: 0.5rem; }
-                p { font-size: 0.85rem; max-width: 420px; line-height: 1.5; color: #cbd5e1; }
-                .hint { font-size: 0.75rem; color: #64748b; margin-top: 1rem; }
-              </style>
-            </head>
-            <body>
-              <h3>${esc(opp ? opp.company || 'Company' : 'Company')} Website</h3>
-              <p>Enter the company's website URL in the address bar above and click <strong>Go</strong> to browse their live website directly.</p>
-              <div class="hint">Or click "Open Full Page" to launch in an external window.</div>
-            </body>
-            </html>
-          `;
-        }
-      }
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
 
     // ================= GMAIL STUDIO =================
@@ -1633,7 +1539,15 @@
         renderBoard();
       });
 
-      // 2. Company description input
+      // 2. Company website input
+      $('cockpit-company-url').addEventListener('input', (e) => {
+        const opp = getSelectedOpp();
+        if (!opp) return;
+        opp.jobUrl = e.target.value.trim();
+        saveOpp(opp, { jobUrl: opp.jobUrl });
+      });
+
+      // 3. Company description input
       $('cockpit-company-desc').addEventListener('input', (e) => {
         const opp = getSelectedOpp();
         if (!opp) return;
@@ -1802,56 +1716,12 @@
       });
 
       // 5. Tools launch buttons
-      on('btn-open-browser-tool', 'click', () => openAuxWorkspace('browser'));
+      on('btn-open-company-site', 'click', openCompanySite);
       on('btn-open-gmail-tool', 'click', () => openAuxWorkspace('gmail'));
 
       // Aux Workspace Tabs & Actions
-      on('tab-btn-browser', 'click', () => selectAuxTab('browser'));
       on('tab-btn-gmail', 'click', () => selectAuxTab('gmail'));
       on('btn-close-aux', 'click', closeAuxWorkspace);
-
-      // Browser Actions: Go, Reload, URL Input, Open External
-      on('btn-browser-go', 'click', () => {
-        const opp = getSelectedOpp();
-        const url = $('browser-url-input').value.trim();
-        if (url) {
-          if (opp) {
-            opp.jobUrl = url;
-            saveOpp(opp, { jobUrl: url });
-          }
-          loadBrowserUrl(url);
-        }
-      });
-
-      $('browser-url-input').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          $('btn-browser-go').click();
-        }
-      });
-
-      on('btn-browser-reload', 'click', () => {
-        const url = $('browser-url-input').value.trim();
-        if (url) loadBrowserUrl(url);
-      });
-
-      on('browser-url-input', 'input', (e) => {
-        const opp = getSelectedOpp();
-        if (opp) {
-          opp.jobUrl = e.target.value.trim();
-          saveOpp(opp, { jobUrl: opp.jobUrl });
-          $('btn-open-posting').href = opp.jobUrl || '#';
-        }
-      });
-
-      on('btn-open-posting', 'click', (e) => {
-        const url = safeUrl($('browser-url-input').value);
-        if (url) window.open(url, '_blank', 'noopener,noreferrer');
-        else {
-          e.preventDefault();
-          showToast('Enter a valid URL (https://...) first', true);
-        }
-      });
 
       // Gmail Actions
       on('btn-target-hm', 'click', () => setGmailTarget('hm'));
