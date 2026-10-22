@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Job Hunt Pipeline Studio V2</title>
+  <title>Opportunity Pipeline</title>
   <!-- Tailwind CSS CDN (pinned) -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script>
@@ -19,16 +19,11 @@
             }
           },
           animation: {
-            'shimmer': 'shimmer 1.8s infinite',
             'fade-in': 'fadeIn 0.15s ease-out',
             'slide-in-right': 'slideInRight 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards',
             'slide-in-left': 'slideInLeft 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards',
           },
           keyframes: {
-            shimmer: {
-              '0%': { transform: 'translateX(-100%)' },
-              '100%': { transform: 'translateX(100%)' }
-            },
             fadeIn: {
               'from': { opacity: '0' },
               'to': { opacity: '1' }
@@ -83,89 +78,64 @@
   <div id="sr-announcements" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
   <!-- ================= TOP APPLICATION HEADER ================= -->
-  <header class="h-16 px-4 md:px-6 border-b border-slate-800/80 bg-slate-900/80 backdrop-blur flex items-center justify-between z-20 flex-shrink-0" role="banner">
-    <div class="flex items-center gap-3 md:gap-5">
-      <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-lg bg-emerald-600/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400" aria-hidden="true">
-          <i data-lucide="shield-check" class="w-4 h-4"></i>
-        </div>
-        <div>
-          <span id="header-candidate-badge" class="text-[10px] uppercase tracking-wider text-slate-400 font-mono font-medium block truncate max-w-[200px] sm:max-w-xs">
-            Candidate • Target Role
-          </span>
-          <h1 class="text-sm md:text-base font-semibold text-white tracking-tight flex items-center gap-2">
-            Target Roles &amp; Opportunities
-            <span class="text-xs font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-800/60 px-2 py-0.5 rounded-full font-mono" id="pipeline-total-val" aria-label="Pipeline total compensation">
-              $0k Target Pipeline
-            </span>
-          </h1>
-        </div>
-      </div>
-
-      <!-- State Indicator Badge -->
-      <div class="hidden xl:flex items-center gap-2 text-xs bg-slate-850 border border-slate-700/70 rounded-full px-3 py-1" role="status">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true"></span>
-        <span class="text-slate-200 font-medium" id="current-state-label">State 1: All Opportunity Board</span>
-      </div>
+  <!-- Simplified Header: All elements from the first screenshot removed -->
+  <header class="h-14 px-4 md:px-6 border-b border-slate-800/80 bg-slate-900/80 backdrop-blur flex items-center justify-between z-20 flex-shrink-0" role="banner">
+    <!-- Search Input -->
+    <div class="relative w-48 sm:w-64 md:w-80">
+      <label for="search-input" class="sr-only">Search companies and contacts</label>
+      <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" aria-hidden="true"></i>
+      <input
+        id="search-input"
+        type="search"
+        placeholder="Filter opportunities..."
+        class="w-full bg-slate-800/90 border border-slate-700 rounded-md pl-9 pr-7 py-1.5 text-xs text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition"
+      />
+      <button id="btn-clear-search" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-0.5" aria-label="Clear search input">
+        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+      </button>
     </div>
 
     <!-- Filter & Action Controls -->
     <div class="flex items-center gap-2 md:gap-3">
-      <!-- Live Search Filter -->
-      <div class="relative w-36 sm:w-48 md:w-60">
-        <label for="search-input" class="sr-only">Search roles, companies, and contacts</label>
-        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" aria-hidden="true"></i>
-        <input
-          id="search-input"
-          type="search"
-          placeholder="Filter roles..."
-          class="w-full bg-slate-800/90 border border-slate-700 rounded-md pl-9 pr-7 py-1.5 text-xs text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition"
-        />
-        <button id="btn-clear-search" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-0.5" aria-label="Clear search input">
-          <i data-lucide="x" class="w-3.5 h-3.5"></i>
-        </button>
-      </div>
-
       <!-- Stage Filter Dropdown -->
-      <div class="relative hidden lg:block">
+      <div class="relative">
         <label for="stage-filter" class="sr-only">Filter by stage</label>
         <select id="stage-filter" class="bg-slate-800/90 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer">
           <option value="all">All Stages</option>
         </select>
       </div>
 
-      <!-- Parameter Edit Button -->
-      <button id="btn-parameter-edit" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 rounded-md text-xs font-medium transition active:scale-95 focus-visible:ring-2 focus-visible:ring-emerald-400 shadow-sm" aria-label="Open Parameter Edit settings">
+      <!-- Settings / Parameter Edit Button -->
+      <button id="btn-parameter-edit" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 rounded-md text-xs font-medium transition active:scale-95 focus-visible:ring-2 focus-visible:ring-emerald-400 shadow-sm" aria-label="Open settings">
         <i data-lucide="sliders" class="w-3.5 h-3.5 text-emerald-400" aria-hidden="true"></i>
-        <span class="hidden sm:inline font-medium">Parameter Edit</span>
-        <span class="sm:hidden">Edit</span>
+        <span class="hidden sm:inline font-medium">Settings</span>
       </button>
 
-      <!-- Primary Action: Add Application -->
+      <!-- Primary Action: Add Opportunity -->
       <button id="btn-add-opp" class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-xs font-medium shadow-sm transition active:scale-95 focus-visible:ring-2 focus-visible:ring-emerald-400">
         <i data-lucide="plus" class="w-3.5 h-3.5" aria-hidden="true"></i>
-        <span class="hidden sm:inline">Add Application</span>
-        <span class="sm:hidden">Add</span>
+        <span>Add Opportunity</span>
       </button>
     </div>
   </header>
 
   <!-- ================= MAIN CONTENT: KANBAN BOARD ================= -->
+  <!-- 3 Stages: Targeted, Applied, Interview loop -->
   <main id="board-container" class="flex-1 flex gap-4 p-4 md:p-5 overflow-x-auto overflow-y-hidden bg-gradient-to-b from-slate-950 via-slate-900/40 to-slate-950 relative" role="region" aria-label="Kanban Board">
-    <!-- Swimlanes will be dynamically injected here -->
+    <!-- Swimlanes injected here -->
   </main>
 
-  <!-- ================= AUXILIARY WORKSPACE: LEFT PANEL ================= -->
-  <div id="aux-workspace" class="hidden fixed top-16 left-0 right-0 md:right-[530px] bottom-0 bg-slate-950/95 border-r border-slate-800 shadow-2xl z-30 flex flex-col animation-slide-in-left" role="dialog" aria-modal="false" aria-labelledby="aux-header-title">
+  <!-- ================= AUXILIARY WORKSPACE: LEFT PANEL (BROWSER & GMAIL ONLY) ================= -->
+  <div id="aux-workspace" class="hidden fixed top-14 left-0 right-0 md:right-[530px] bottom-0 bg-slate-950/95 border-r border-slate-800 shadow-2xl z-30 flex flex-col animation-slide-in-left" role="dialog" aria-modal="false" aria-labelledby="aux-header-title">
     <div class="h-12 px-4 md:px-5 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between flex-shrink-0">
       <div class="flex items-center gap-2">
-        <span id="aux-header-title" class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Outreach:</span>
+        <span id="aux-header-title" class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Tool:</span>
         <div role="tablist" aria-label="Auxiliary Workspace Tabs" class="flex items-center gap-1.5">
           <button id="tab-btn-browser" role="tab" aria-selected="true" aria-controls="aux-browser-view" class="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border bg-blue-600/20 text-blue-300 border-blue-500/40 focus-visible:ring-2">
-            <i data-lucide="globe" class="w-3.5 h-3.5" aria-hidden="true"></i> Job Posting
+            <i data-lucide="globe" class="w-3.5 h-3.5" aria-hidden="true"></i> Browser
           </button>
           <button id="tab-btn-gmail" role="tab" aria-selected="false" aria-controls="aux-gmail-view" class="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border bg-slate-800 text-slate-300 hover:text-white border-slate-700 focus-visible:ring-2">
-            <i data-lucide="mail" class="w-3.5 h-3.5" aria-hidden="true"></i> Gmail Studio
+            <i data-lucide="mail" class="w-3.5 h-3.5" aria-hidden="true"></i> Gmail
           </button>
         </div>
       </div>
@@ -179,32 +149,37 @@
       </div>
     </div>
 
-    <!-- TAB 1: JOB POSTING VIEWER & ANALYZER -->
-    <div id="aux-browser-view" role="tabpanel" aria-labelledby="tab-btn-browser" class="flex-1 flex flex-col overflow-hidden">
-      <div class="h-11 px-4 border-b border-slate-800 bg-slate-900/60 flex items-center gap-2 flex-shrink-0">
+    <!-- TAB 1: COMPANY BROWSER VIEW -->
+    <div id="aux-browser-view" role="tabpanel" aria-labelledby="tab-btn-browser" class="flex-1 flex flex-col overflow-hidden bg-slate-950">
+      <div class="h-11 px-3 md:px-4 border-b border-slate-800 bg-slate-900/80 flex items-center gap-2 flex-shrink-0">
+        <button id="btn-browser-reload" type="button" title="Reload page" class="p-1.5 text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded transition flex-shrink-0">
+          <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+        </button>
         <div class="flex-1 relative flex items-center">
-          <label for="browser-url-input" class="sr-only">Job Posting URL</label>
-          <i data-lucide="lock" class="w-3 h-3 text-emerald-400 absolute left-2.5" aria-hidden="true"></i>
+          <i data-lucide="globe" class="w-3.5 h-3.5 text-blue-400 absolute left-2.5 pointer-events-none" aria-hidden="true"></i>
           <input
             id="browser-url-input"
             type="url"
-            placeholder="Paste job posting URL (https://...)"
-            class="w-full bg-slate-950/80 border border-slate-700 rounded-md pl-8 pr-32 py-1 text-xs text-slate-200 font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="Company website URL (https://...)"
+            class="w-full bg-slate-950 border border-slate-700 rounded-md pl-8 pr-14 py-1 text-xs text-slate-200 font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
-          <button id="btn-clip-job" class="absolute right-1 px-2.5 py-0.5 bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/40 rounded text-[11px] font-medium transition flex items-center gap-1">
-            <span id="btn-clip-spinner" class="hidden w-3 h-3 border-2 border-blue-300 border-t-transparent rounded-full animate-spin"></span>
-            <i data-lucide="target" class="w-3 h-3" id="btn-clip-icon" aria-hidden="true"></i>
-            <span id="btn-clip-text">Analyze Posting</span>
+          <button id="btn-browser-go" type="button" class="absolute right-1 px-2.5 py-0.5 bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/40 rounded text-[11px] font-medium transition">
+            Go
           </button>
         </div>
-        <button id="btn-open-posting" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[11px] text-slate-300 border border-slate-700 flex items-center gap-1 transition">
-          <i data-lucide="external-link" class="w-3 h-3" aria-hidden="true"></i>
-          <span class="hidden sm:inline">Open URL</span>
-        </button>
+        <a id="btn-open-posting" href="#" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[11px] text-slate-300 hover:text-white border border-slate-700 flex items-center gap-1 transition flex-shrink-0" title="Open in new window">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Open Full Page</span>
+        </a>
       </div>
 
-      <div id="browser-content" class="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-900/30 space-y-6">
-        <!-- Rendered Posting Content -->
+      <div class="flex-1 relative bg-slate-900 flex flex-col overflow-hidden">
+        <iframe
+          id="browser-iframe"
+          class="flex-1 w-full h-full border-0 bg-white"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          src="about:blank"
+        ></iframe>
       </div>
     </div>
 
@@ -261,8 +236,8 @@
           <label for="gmail-body-textarea" class="sr-only">Email Draft Body</label>
           <textarea
             id="gmail-body-textarea"
-            class="flex-1 w-full bg-slate-900/60 border border-slate-800 rounded-lg p-4 text-xs text-slate-200 leading-relaxed font-sans focus:outline-none focus:ring-1 focus:ring-red-500/50 placeholder:text-slate-500 resize-none"
-            placeholder="Select a strategy above to generate an authentic draft from your verified background"
+            class="flex-1 w-full bg-slate-900/60 border border-slate-800 rounded-lg p-4 text-xs text-slate-200 leading-relaxed font-sans focus:outline-none focus:ring-1 focus:ring-red-500/50 placeholder:text-slate-500 resize-none min-h-[140px]"
+            placeholder="Select a strategy above to generate an authentic draft from your background"
           ></textarea>
 
           <div id="antislop-audit-box" class="mt-2 p-2.5 bg-slate-900/90 border border-slate-800 rounded-md flex flex-wrap items-center justify-between gap-2 text-xs" role="region" aria-label="Anti-slop wording audit">
@@ -282,133 +257,181 @@
 
         <div class="pt-2 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
           <div class="flex items-center gap-2">
-            <button id="btn-gmail-send" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-md text-xs font-semibold shadow-sm transition flex items-center gap-1.5 active:scale-95">
-              <i data-lucide="send" class="w-3.5 h-3.5" aria-hidden="true"></i> Open in Gmail
+            <button id="btn-gmail-send" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-xs font-semibold shadow-sm transition flex items-center gap-1.5 active:scale-95">
+              <span id="gmail-send-spinner" class="hidden w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <i data-lucide="send" id="gmail-send-icon" class="w-3.5 h-3.5" aria-hidden="true"></i>
+              <span id="gmail-send-text">Send Email</span>
             </button>
             <button id="btn-gmail-save-draft" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-md text-xs font-medium transition flex items-center gap-1.5 active:scale-95">
-              <i data-lucide="save" class="w-3.5 h-3.5" aria-hidden="true"></i> Save to Comms History
+              <i data-lucide="save" class="w-3.5 h-3.5" aria-hidden="true"></i> Save to Contact History
             </button>
           </div>
-          <span id="gmail-hint" class="text-[11px] text-slate-400 font-mono">Draft opens in Gmail compose; nothing is sent automatically</span>
+          <div class="flex items-center gap-2">
+            <button id="btn-gmail-web-fallback" type="button" class="text-[11px] text-slate-400 hover:text-slate-200 underline font-mono">
+              Open in Web Gmail ↗
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ================= STATE 2: SINGLE OPPORTUNITY COCKPIT ================= -->
-  <aside id="cockpit-drawer" class="hidden fixed top-16 right-0 bottom-0 w-full sm:w-[500px] lg:w-[530px] max-w-full bg-slate-900 border-l border-slate-800 shadow-2xl z-40 flex flex-col animation-slide-in-right" role="dialog" aria-modal="true" aria-labelledby="cockpit-title">
-    <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90 backdrop-blur">
-      <div class="flex items-center gap-2.5">
-        <div id="cockpit-match-pill" class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-700 text-emerald-400 font-bold" aria-label="Role match score">
-          UNSCORED
-        </div>
-        <h2 id="cockpit-title" class="text-sm font-semibold text-white truncate max-w-[280px] sm:max-w-[340px]">Company Role</h2>
+  <!-- ================= OPPORTUNITY COCKPIT: COMPANY FOCUSED LAYOUT ================= -->
+  <aside id="cockpit-drawer" class="hidden fixed top-14 right-0 bottom-0 w-full sm:w-[500px] lg:w-[540px] max-w-full bg-slate-900 border-l border-slate-800 shadow-2xl z-40 flex flex-col animation-slide-in-right overflow-hidden" role="dialog" aria-modal="true" aria-labelledby="cockpit-company">
+    <!-- 1. Company Name Up Top & Actions -->
+    <div class="p-4 border-b border-slate-800 bg-slate-900/95 flex items-center justify-between gap-3 flex-shrink-0">
+      <div class="flex-1 min-w-0">
+        <label for="cockpit-company" class="sr-only">Company Name</label>
+        <input
+          id="cockpit-company"
+          type="text"
+          placeholder="Company Name"
+          class="w-full bg-transparent text-lg font-bold text-white tracking-tight focus:outline-none focus:ring-1 focus:ring-emerald-500 rounded px-1.5 py-0.5 border border-transparent hover:border-slate-700 transition"
+        />
       </div>
-      <div class="flex items-center gap-1">
-        <button id="cockpit-delete-btn" title="Delete Application" aria-label="Delete Application" class="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded transition focus-visible:ring-2">
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <select id="cockpit-stage-select" class="bg-slate-800 border border-slate-700 rounded px-2.5 py-1 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"></select>
+        <button id="cockpit-delete-btn" title="Delete Opportunity" aria-label="Delete Opportunity" class="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded transition focus-visible:ring-2">
           <i data-lucide="trash-2" class="w-4 h-4" aria-hidden="true"></i>
         </button>
-        <button id="cockpit-close-btn" title="Close Cockpit (ESC)" aria-label="Close Cockpit Drawer" class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition focus-visible:ring-2">
+        <button id="cockpit-close-btn" title="Close (ESC)" aria-label="Close Cockpit Drawer" class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition focus-visible:ring-2">
           <i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i>
         </button>
       </div>
     </div>
 
-    <!-- Quick Attributes Form -->
-    <div class="p-4 border-b border-slate-800/80 bg-slate-950/40 grid grid-cols-2 gap-3 text-xs" role="form" aria-label="Application Attributes">
-      <div>
-        <label for="cockpit-company" class="text-[10px] font-medium text-slate-400 block mb-1">COMPANY</label>
-        <input id="cockpit-company" type="text" placeholder="Company name" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500">
-      </div>
-      <div>
-        <label for="cockpit-title-input" class="text-[10px] font-medium text-slate-400 block mb-1">ROLE</label>
-        <input id="cockpit-title-input" type="text" placeholder="Target role title" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500">
-      </div>
-      <div>
-        <label for="cockpit-stage-select" class="text-[10px] font-medium text-slate-400 block mb-1">STAGE</label>
-        <select id="cockpit-stage-select" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"></select>
-      </div>
-      <div>
-        <label for="cockpit-value-input" class="text-[10px] font-medium text-slate-400 block mb-1">TARGET COMP ($)</label>
-        <input id="cockpit-value-input" type="number" step="5000" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200 font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500">
-      </div>
-      <div>
-        <label for="cockpit-hm-name" class="text-[10px] font-medium text-slate-400 block mb-1">HIRING MANAGER</label>
-        <input id="cockpit-hm-name" type="text" placeholder="e.g. VP of Sales" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500">
-      </div>
-      <div>
-        <label for="cockpit-hm-email" class="text-[10px] font-medium text-slate-400 block mb-1">HM EMAIL</label>
-        <input id="cockpit-hm-email" type="email" placeholder="name@company.com" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200 font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500">
-      </div>
-      <div>
-        <label for="cockpit-contact-name" class="text-[10px] font-medium text-slate-400 block mb-1">RECRUITER</label>
-        <input id="cockpit-contact-name" type="text" placeholder="Recruiter name" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500">
-      </div>
-      <div>
-        <label for="cockpit-contact-email" class="text-[10px] font-medium text-slate-400 block mb-1">RECRUITER EMAIL</label>
-        <input id="cockpit-contact-email" type="email" placeholder="name@company.com" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200 font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500">
-      </div>
-    </div>
+    <!-- Scrollable Body with Company-Focused Sections -->
+    <div class="flex-1 overflow-y-auto divide-y divide-slate-800/80">
+      
+      <!-- 2. One line description of what the company does -->
+      <section class="p-4 space-y-2 bg-slate-950/40" aria-label="Company Description">
+        <label for="cockpit-company-desc" class="text-[10px] font-semibold tracking-wider text-slate-400 uppercase font-mono block">
+          What the company does
+        </label>
+        <input
+          id="cockpit-company-desc"
+          type="text"
+          placeholder="One line description of what the company does..."
+          class="w-full bg-slate-850 border border-slate-700 rounded-md px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition"
+        />
+      </section>
 
-    <!-- Dynamic Cockpit Tool Dock -->
-    <div class="px-4 py-2 border-b border-slate-800 bg-slate-950/70 flex items-center gap-1.5 overflow-x-auto flex-shrink-0" role="toolbar" aria-label="Cockpit Tool Toggles">
-      <span class="text-[10px] font-semibold tracking-wider uppercase text-slate-400 mr-0.5 flex items-center gap-1">
-        <i data-lucide="layers" class="w-3 h-3" aria-hidden="true"></i> Tools:
-      </span>
+      <!-- 3. Points of contact: Name, role and togglable email/phone -->
+      <section class="p-4 space-y-3 bg-slate-900/30" aria-label="Points of Contact">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-semibold tracking-wider text-slate-400 uppercase font-mono">
+            Points of Contact
+          </span>
+          <button id="btn-add-contact-row" type="button" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded text-[11px] font-medium flex items-center gap-1 transition active:scale-95">
+            <i data-lucide="plus" class="w-3 h-3" aria-hidden="true"></i>
+            <span>Add Contact</span>
+          </button>
+        </div>
 
-      <button id="tag-browser" class="tool-tag-pill flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition border bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700">
-        <i data-lucide="globe" class="w-3 h-3 text-blue-400" aria-hidden="true"></i>
-        <span>Browser</span>
-      </button>
+        <!-- Dynamic Contacts List -->
+        <div id="contacts-list-container" class="space-y-2">
+          <!-- Rendered via renderContactsList() -->
+        </div>
+      </section>
 
-      <button id="tag-gmail" class="tool-tag-pill flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition border bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700">
-        <i data-lucide="mail" class="w-3 h-3 text-red-400" aria-hidden="true"></i>
-        <span>Gmail</span>
-      </button>
+      <!-- 4. Contact history: History first, with + New option -->
+      <section class="p-4 space-y-3 bg-slate-950/40" aria-label="Contact History">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-semibold tracking-wider text-slate-400 uppercase font-mono">
+              Contact History
+            </span>
+            <span id="contact-history-count" class="text-[10px] font-mono text-slate-400">0 interactions</span>
+          </div>
+          <button id="btn-toggle-new-history" type="button" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[11px] font-medium transition flex items-center gap-1 active:scale-95" aria-expanded="false">
+            <i data-lucide="plus" class="w-3 h-3" aria-hidden="true"></i>
+            <span>+ New</span>
+          </button>
+        </div>
 
-      <button id="tag-match" class="tool-tag-pill flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition border bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700">
-        <i data-lucide="target" class="w-3 h-3 text-emerald-400" aria-hidden="true"></i>
-        <span>Match &amp; Gaps</span>
-      </button>
+        <!-- History Timeline List FIRST -->
+        <div id="contact-history-list" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+          <!-- Rendered via renderContactHistoryList() -->
+        </div>
 
-      <button id="tag-notes" class="tool-tag-pill flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition border bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700">
-        <i data-lucide="award" class="w-3 h-3 text-amber-400" aria-hidden="true"></i>
-        <span>STAR Stories</span>
-        <span id="tag-badge-notes" class="text-[10px] font-mono px-1 rounded-full bg-slate-800">0</span>
-      </button>
+        <!-- Quick Log Entry Box (Hidden by default, shows when + New is clicked) -->
+        <div id="history-form-box" class="hidden p-3 bg-slate-900 border border-slate-800 rounded-lg space-y-2.5 shadow-sm animation-fade-in">
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-1.5">
+            <span class="text-[11px] font-medium text-slate-200">Log New Interaction</span>
+            <button id="btn-cancel-new-history" type="button" class="text-[11px] text-slate-400 hover:text-slate-200">Cancel</button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div>
+              <label for="history-date-input" class="text-[10px] text-slate-400 font-medium block mb-1">DATE</label>
+              <input id="history-date-input" type="date" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono" />
+            </div>
+            <div>
+              <label for="history-contact-input" class="text-[10px] text-slate-400 font-medium block mb-1">POINT OF CONTACT</label>
+              <input id="history-contact-input" type="text" list="contacts-datalist" placeholder="Select or type name" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500" />
+              <datalist id="contacts-datalist"></datalist>
+            </div>
+            <div>
+              <label for="history-method-select" class="text-[10px] text-slate-400 font-medium block mb-1">METHOD</label>
+              <select id="history-method-select" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer">
+                <option value="audio">Audio (Call)</option>
+                <option value="video">Video (Meeting)</option>
+                <option value="email">Email</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
 
-      <button id="tag-artifacts" class="tool-tag-pill flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition border bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700">
-        <i data-lucide="cpu" class="w-3 h-3 text-purple-400" aria-hidden="true"></i>
-        <span>Proof of Work</span>
-      </button>
+          <div>
+            <label for="history-summary-input" class="text-[10px] text-slate-400 font-medium block mb-1">BRIEF SUMMARY</label>
+            <div class="flex gap-2">
+              <input id="history-summary-input" type="text" placeholder="Brief summary of interaction..." class="flex-1 bg-slate-800 border border-slate-700 rounded px-2.5 py-1 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500" />
+              <button id="btn-log-history" type="button" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-medium transition flex items-center gap-1 active:scale-95 flex-shrink-0">
+                <i data-lucide="plus" class="w-3.5 h-3.5" aria-hidden="true"></i>
+                <span>Log</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <button id="tag-tasks" class="tool-tag-pill flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition border bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700">
-        <i data-lucide="check-square" class="w-3 h-3 text-slate-400" aria-hidden="true"></i>
-        <span>Tasks</span>
-        <span id="tag-badge-tasks" class="text-[10px] font-mono px-1 rounded-full bg-slate-800">0</span>
-      </button>
+      <!-- 5. Tools: Only keep Browser and Gmail -->
+      <section class="p-4 space-y-2.5 bg-slate-900/30" aria-label="Tools">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-semibold tracking-wider text-slate-400 uppercase font-mono flex items-center gap-1.5">
+            <i data-lucide="layers" class="w-3 h-3 text-slate-400" aria-hidden="true"></i> Tools
+          </span>
+          <span class="text-[10px] text-slate-400 font-mono">Browser &amp; Gmail</span>
+        </div>
 
-      <button id="tag-comms" class="tool-tag-pill flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition border bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700">
-        <i data-lucide="message-square" class="w-3 h-3 text-slate-400" aria-hidden="true"></i>
-        <span>Comms</span>
-      </button>
-    </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <button id="btn-open-browser-tool" type="button" class="flex items-center justify-center gap-2.5 p-3 rounded-lg border border-slate-700 bg-slate-850 hover:bg-slate-800 text-slate-200 hover:text-white transition group focus-visible:ring-2">
+            <div class="w-7 h-7 rounded-md bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400 group-hover:scale-105 transition">
+              <i data-lucide="globe" class="w-4 h-4" aria-hidden="true"></i>
+            </div>
+            <div class="text-left">
+              <span class="text-xs font-semibold block text-slate-200">Browser</span>
+              <span class="text-[10px] text-slate-400 block">Job &amp; Intel</span>
+            </div>
+          </button>
 
-    <!-- Active Tools Workpads Container -->
-    <div id="cockpit-tools-container" class="flex-1 overflow-y-auto p-4 space-y-4" role="region" aria-label="Cockpit Workpads">
-      <!-- In-cockpit active workpads render here -->
+          <button id="btn-open-gmail-tool" type="button" class="flex items-center justify-center gap-2.5 p-3 rounded-lg border border-slate-700 bg-slate-850 hover:bg-slate-800 text-slate-200 hover:text-white transition group focus-visible:ring-2">
+            <div class="w-7 h-7 rounded-md bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-400 group-hover:scale-105 transition">
+              <i data-lucide="mail" class="w-4 h-4" aria-hidden="true"></i>
+            </div>
+            <div class="text-left">
+              <span class="text-xs font-semibold block text-slate-200">Gmail</span>
+              <span class="text-[10px] text-slate-400 block">Studio &amp; Linter</span>
+            </div>
+          </button>
+        </div>
+      </section>
     </div>
 
     <!-- Cockpit Footer -->
-    <div class="p-3 border-t border-slate-800 bg-slate-900/90 flex items-center justify-between text-xs">
-      <div class="flex items-center gap-2">
-        <button id="cockpit-advance-stage" class="px-2.5 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 rounded font-medium transition flex items-center gap-1 active:scale-95">
-          <i data-lucide="check" class="w-3.5 h-3.5" aria-hidden="true"></i> Advance Stage
-        </button>
-        <button id="cockpit-open-aux-btn" class="px-2.5 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 rounded font-medium transition flex items-center gap-1 active:scale-95">
-          <i data-lucide="split" class="w-3.5 h-3.5" aria-hidden="true"></i> Open Left Panel
-        </button>
-      </div>
+    <div class="p-3 border-t border-slate-800 bg-slate-900/90 flex items-center justify-between text-xs flex-shrink-0">
+      <button id="cockpit-advance-stage" class="px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 rounded font-medium transition flex items-center gap-1 active:scale-95">
+        <i data-lucide="arrow-right" class="w-3.5 h-3.5" aria-hidden="true"></i> Advance Stage
+      </button>
       <span id="save-status" class="text-[11px] text-slate-400 font-mono" role="status">Saved to database</span>
     </div>
   </aside>
@@ -419,15 +442,15 @@
       <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-shrink-0">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-lg bg-emerald-600/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
-            <i data-lucide="sliders" class="w-4 h-4"></i>
+            <i data-lucide="sliders" class="w-4 h-4" aria-hidden="true"></i>
           </div>
           <div>
-            <h2 id="param-modal-title" class="text-sm font-semibold text-white tracking-tight">Parameter Edit &amp; Job Hunter Profile</h2>
-            <p class="text-[11px] text-slate-400">Tailor the cockpit to your background, target role, and connect Gemini AI.</p>
+            <h2 id="param-modal-title" class="text-sm font-semibold text-white tracking-tight">Candidate Profile &amp; AI Settings</h2>
+            <p class="text-[11px] text-slate-400">Tailor your candidate identity, target role, and connect Gemini AI.</p>
           </div>
         </div>
-        <button id="param-modal-close" class="text-slate-400 hover:text-white p-1 rounded transition" aria-label="Close Parameter Edit">
-          <i data-lucide="x" class="w-4 h-4"></i>
+        <button id="param-modal-close" class="text-slate-400 hover:text-white p-1 rounded transition" aria-label="Close Settings">
+          <i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i>
         </button>
       </div>
 
@@ -435,15 +458,15 @@
         <!-- Identity & Gmail -->
         <div class="space-y-3 bg-slate-950/50 p-3.5 rounded-lg border border-slate-800/80">
           <div class="flex items-center gap-1.5 text-slate-200 font-semibold uppercase text-[10px] tracking-wider font-mono">
-            <i data-lucide="user" class="w-3.5 h-3.5 text-emerald-400"></i> Identity &amp; Gmail Connection
+            <i data-lucide="user" class="w-3.5 h-3.5 text-emerald-400" aria-hidden="true"></i> Identity &amp; Gmail Connection
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label for="param-name" class="text-[10px] font-medium text-slate-400 block mb-1">CANDIDATE FULL NAME</label>
-              <input id="param-name" type="text" placeholder="e.g. Jane Doe" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+              <input id="param-name" type="text" placeholder="e.g. Max Mardan" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500">
             </div>
             <div>
-              <label for="param-email" class="text-[10px] font-medium text-slate-400 block mb-1">GMAIL ADDRESS (FOR OUTREACH &amp; FROM)</label>
+              <label for="param-email" class="text-[10px] font-medium text-slate-400 block mb-1">GMAIL ADDRESS (FOR OUTREACH)</label>
               <input id="param-email" type="email" placeholder="e.g. your.email@gmail.com" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500">
             </div>
           </div>
@@ -453,18 +476,18 @@
           </div>
         </div>
 
-        <!-- Target Career & Comp -->
+        <!-- Target Career -->
         <div class="space-y-3 bg-slate-950/50 p-3.5 rounded-lg border border-slate-800/80">
           <div class="flex items-center gap-1.5 text-slate-200 font-semibold uppercase text-[10px] tracking-wider font-mono">
-            <i data-lucide="target" class="w-3.5 h-3.5 text-blue-400"></i> Career Targets
+            <i data-lucide="target" class="w-3.5 h-3.5 text-blue-400" aria-hidden="true"></i> Career Targets
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div class="sm:col-span-1">
               <label for="param-role" class="text-[10px] font-medium text-slate-400 block mb-1">TARGET ROLE TITLE</label>
-              <input id="param-role" type="text" placeholder="e.g. Senior Account Executive" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500">
+              <input id="param-role" type="text" placeholder="e.g. Account Executive" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500">
             </div>
             <div class="sm:col-span-1">
-              <label for="param-ote" class="text-[10px] font-medium text-slate-400 block mb-1">TARGET OTE COMP ($)</label>
+              <label for="param-ote" class="text-[10px] font-medium text-slate-400 block mb-1">TARGET COMP ($)</label>
               <input id="param-ote" type="number" step="5000" placeholder="150000" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 font-mono focus:outline-none focus:ring-1 focus:ring-blue-500">
             </div>
             <div class="sm:col-span-1">
@@ -474,125 +497,84 @@
           </div>
         </div>
 
-        <!-- Background Summary & Core Strengths -->
+        <!-- Background Summary -->
         <div class="space-y-3 bg-slate-950/50 p-3.5 rounded-lg border border-slate-800/80">
           <div class="flex items-center gap-1.5 text-slate-200 font-semibold uppercase text-[10px] tracking-wider font-mono">
-            <i data-lucide="award" class="w-3.5 h-3.5 text-amber-400"></i> Narrative &amp; Ground Truth (For AI Matching)
+            <i data-lucide="file-text" class="w-3.5 h-3.5 text-amber-400" aria-hidden="true"></i> Professional Background
           </div>
           <div>
-            <label for="param-summary" class="text-[10px] font-medium text-slate-400 block mb-1">PROFESSIONAL BACKGROUND SUMMARY</label>
-            <textarea id="param-summary" rows="2" placeholder="Brief elevator pitch summarizing your career strengths and track record..." class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-slate-100 leading-relaxed focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none"></textarea>
-          </div>
-          <div>
-            <label for="param-headline" class="text-[10px] font-medium text-slate-400 block mb-1">HEADLINE SPECIALTY (SHOWN IN TOP HEADER)</label>
-            <input id="param-headline" type="text" placeholder="e.g. Enterprise B2B SaaS &amp; Fintech Edition" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500">
+            <label for="param-summary" class="text-[10px] font-medium text-slate-400 block mb-1">EXECUTIVE SUMMARY</label>
+            <textarea id="param-summary" rows="3" class="w-full bg-slate-800 border border-slate-700 rounded p-2.5 text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none leading-relaxed" placeholder="Experienced professional with proven track record..."></textarea>
           </div>
         </div>
 
-        <!-- Gemini AI Integration -->
-        <div class="space-y-3 bg-slate-950/50 p-3.5 rounded-lg border border-purple-900/40">
+        <!-- Gemini API Key -->
+        <div class="space-y-3 bg-slate-950/50 p-3.5 rounded-lg border border-slate-800/80">
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-1.5 text-purple-300 font-semibold uppercase text-[10px] tracking-wider font-mono">
-              <i data-lucide="cpu" class="w-3.5 h-3.5 text-purple-400"></i> Google Gemini AI Integration
+            <div class="flex items-center gap-1.5 text-slate-200 font-semibold uppercase text-[10px] tracking-wider font-mono">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-400" aria-hidden="true"></i> Google Gemini AI Connection
             </div>
-            <span id="gemini-status-pill" class="text-[10px] font-mono px-2 py-0.5 rounded border font-semibold bg-slate-800 border-slate-700 text-slate-400">
-              Not Configured
-            </span>
+            <span id="gemini-status-badge" class="text-[10px] font-mono px-2 py-0.5 rounded border bg-slate-800 border-slate-700 text-slate-400">Not Connected</span>
           </div>
-          <p class="text-[11px] text-slate-400 leading-normal">
-            Enter your Google Gemini API key to activate live semantic posting analysis, hyper-customized cold email drafts, and anti-slop rewrites. Get a free key at <a href="https://aistudio.google.com" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:underline">aistudio.google.com</a>.
-          </p>
-          <div>
-            <label for="param-gemini-key" class="text-[10px] font-medium text-slate-400 block mb-1">GEMINI API KEY</label>
-            <div class="flex items-center gap-2">
-              <input id="param-gemini-key" type="password" placeholder="AIzaSy..." class="flex-1 bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 font-mono focus:outline-none focus:ring-1 focus:ring-purple-500">
-              <button id="btn-toggle-key-vis" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 text-xs transition" aria-label="Toggle API key visibility">
-                Show
-              </button>
-              <button id="btn-test-gemini-key" class="px-3 py-1.5 bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 border border-purple-500/40 rounded text-xs font-medium transition flex items-center gap-1">
-                <span id="test-key-spinner" class="hidden w-3 h-3 border-2 border-purple-300 border-t-transparent rounded-full animate-spin"></span>
+          <div class="space-y-2">
+            <div class="flex gap-2">
+              <input id="param-gemini-key" type="password" placeholder="AIzaSy... (free key from aistudio.google.com)" class="flex-1 bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-purple-500">
+              <button id="btn-test-gemini" type="button" class="px-3 py-1.5 bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 rounded text-xs font-medium transition flex items-center gap-1">
+                <span id="gemini-test-spinner" class="hidden w-3 h-3 border-2 border-purple-300 border-t-transparent rounded-full animate-spin"></span>
                 <span>Test Key</span>
               </button>
             </div>
-            <span id="test-key-feedback" class="text-[11px] font-mono mt-1 block"></span>
+            <p id="gemini-test-result" class="text-[11px] font-mono hidden"></p>
           </div>
         </div>
       </div>
 
-      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800 flex-shrink-0">
-        <button id="btn-cancel-params" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs font-medium border border-slate-700 transition">
-          Cancel
-        </button>
-        <button id="btn-save-params" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-semibold shadow-sm transition flex items-center gap-1.5 active:scale-95">
-          <span id="save-params-spinner" class="hidden w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-          <span>Save &amp; Apply Parameters</span>
-        </button>
+      <div class="pt-3 border-t border-slate-800 flex items-center justify-between flex-shrink-0">
+        <button id="param-btn-cancel" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition">Cancel</button>
+        <button id="param-btn-save" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-semibold shadow-sm transition active:scale-95">Save Profile</button>
       </div>
     </div>
   </div>
 
-  <!-- ================= MODAL / CONFIRMATION DIALOG ================= -->
+  <!-- Accessible Confirmation Modal -->
   <div id="modal-container" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-5 shadow-2xl space-y-4 animation-fade-in" id="modal-card">
+    <div class="bg-slate-900 border border-slate-800 rounded-lg max-w-sm w-full p-4 shadow-2xl space-y-4 animation-fade-in">
       <div class="flex items-start gap-3">
-        <div id="modal-icon-container" class="w-9 h-9 rounded-full bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-400 flex-shrink-0" aria-hidden="true">
-          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        <div id="modal-icon-container" class="w-8 h-8 rounded-full bg-red-950/80 border border-red-800 flex items-center justify-center text-red-400 flex-shrink-0">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
         </div>
         <div class="space-y-1">
-          <h3 id="modal-title" class="text-sm font-semibold text-white">Confirmation</h3>
-          <p id="modal-message" class="text-xs text-slate-300 leading-relaxed">Are you sure you want to proceed?</p>
+          <h3 id="modal-title" class="text-sm font-semibold text-white">Delete Item</h3>
+          <p id="modal-message" class="text-xs text-slate-400 leading-relaxed">Are you sure?</p>
         </div>
       </div>
       <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
-        <button id="modal-btn-cancel" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs font-medium border border-slate-700 transition">
-          Cancel
-        </button>
-        <button id="modal-btn-confirm" class="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded text-xs font-semibold shadow-sm transition">
-          Confirm
-        </button>
+        <button id="modal-btn-cancel" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition">Cancel</button>
+        <button id="modal-btn-confirm" class="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded text-xs font-medium shadow-sm transition">Delete</button>
       </div>
     </div>
   </div>
 
-  <!-- ================= TOAST NOTIFICATION CONTAINER ================= -->
-  <div id="toast" class="fixed bottom-5 left-4 md:left-6 px-4 py-2.5 rounded-lg bg-slate-850 border border-slate-750 text-xs text-slate-200 shadow-2xl opacity-0 pointer-events-none transition-all duration-200 flex items-center gap-2.5 z-50 max-w-sm" role="status" aria-live="polite">
-    <div id="toast-icon" class="text-emerald-400 flex-shrink-0" aria-hidden="true">
-      <i data-lucide="check-circle" class="w-4 h-4"></i>
-    </div>
-    <span id="toast-msg" class="flex-1 font-medium leading-tight">Action completed</span>
-    <button id="toast-close" class="text-slate-400 hover:text-white p-0.5 ml-1" aria-label="Dismiss notification">
-      <i data-lucide="x" class="w-3.5 h-3.5"></i>
-    </button>
-  </div>
+  <!-- Toast Notifications -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none" aria-live="assertive"></div>
 
-  <!-- ================= APPLICATION SCRIPT ================= -->
+  <!-- ================= APPLICATION JAVASCRIPT ================= -->
   <script>
-    /**
-     * PIPEMANAGER V2.5 - RELEASE-READY COMPONENT ARCHITECTURE
-     * Fully configurable for any candidate, role, and Gemini AI key.
-     */
+    'use strict';
 
+    // The three simplified opportunity stages requested by user
     const STAGES = [
-      { id: 'wishlist', name: 'Wishlist & Target', color: 'blue', border: 'border-blue-500/30' },
+      { id: 'targeted', name: 'Targeted', color: 'blue', border: 'border-blue-500/30' },
       { id: 'applied', name: 'Applied', color: 'indigo', border: 'border-indigo-500/30' },
-      { id: 'screening', name: 'Recruiter Screen', color: 'purple', border: 'border-purple-500/30' },
-      { id: 'interview', name: 'Interview Loop', color: 'amber', border: 'border-amber-500/30' },
-      { id: 'offer', name: 'Offer & Negotiation', color: 'emerald', border: 'border-emerald-500/30' },
+      { id: 'interview_loop', name: 'Interview loop', color: 'amber', border: 'border-amber-500/30' },
     ];
     const STAGE_IDS = STAGES.map((s) => s.id);
 
     const STAGE_DOT_CLASSES = {
       blue: 'bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.5)]',
       indigo: 'bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.5)]',
-      purple: 'bg-purple-400 shadow-[0_0_8px_rgba(192,132,252,0.5)]',
       amber: 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]',
-      emerald: 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]',
     };
-
-    const COCKPIT_TOOLS = ['match', 'notes', 'artifacts', 'tasks', 'comms'];
-    const WORKPAD_ORDER = ['match', 'artifacts', 'notes', 'tasks', 'comms'];
-    const PROOF_STATUSES = ['planned', 'drafting', 'ready'];
-    const DEFAULT_JOB_DETAILS = { team: '', requirements: '', techStack: '', compensation: 'Set from posting' };
 
     const store = {
       state: {
@@ -603,174 +585,147 @@
         stageFilter: 'all',
         isAuxOpen: false,
         activeAuxTab: 'browser',
-        currentGmailTarget: 'hm',
-        currentTemplate: 'backchannel',
-        draftDirty: false,
-        toolDock: { match: true, notes: false, artifacts: false, tasks: false, comms: false },
+        gmailTarget: 'hm',
         isLoading: true,
         lastFocusedElement: null,
+        saveStatusTimer: null,
       },
       listeners: new Set(),
       subscribe(fn) {
         this.listeners.add(fn);
         return () => this.listeners.delete(fn);
       },
-      notify() {
+      set(partial) {
+        Object.assign(this.state, partial);
         this.listeners.forEach((fn) => fn(this.state));
-      },
-      get() {
-        return this.state;
-      },
-      set(updates) {
-        Object.assign(this.state, updates);
-        this.notify();
       }
     };
 
     const $ = (id) => document.getElementById(id);
+    const on = (id, event, handler) => {
+      const el = $(id);
+      if (el) el.addEventListener(event, handler);
+    };
 
-    const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
     function esc(val) {
-      return String(val ?? '').replace(/[&<>"']/g, (c) => HTML_ESCAPES[c]);
+      if (val === null || val === undefined) return '';
+      return String(val)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     function safeUrl(raw) {
-      const val = String(raw ?? '').trim();
-      if (!val) return '';
+      if (!raw) return null;
       try {
-        const u = new URL(/^[a-z][a-z0-9+.-]*:/i.test(val) ? val : `https://${val}`);
-        return u.protocol === 'http:' || u.protocol === 'https:' ? u.href : '';
+        const u = new URL(raw);
+        return (u.protocol === 'http:' || u.protocol === 'https:') ? u.href : null;
       } catch {
-        return '';
+        return null;
       }
     }
 
     function getSelectedOpp() {
-      return store.state.opportunities.find((o) => o.id === store.state.selectedOppId);
+      return store.state.opportunities.find((o) => o.id === store.state.selectedOppId) || null;
     }
 
     function byOrderIndex(a, b) {
-      return (a.orderIndex ?? 0) - (b.orderIndex ?? 0);
-    }
-
-    function matchLabel(opp) {
-      return opp.matchScore > 0 ? `${opp.matchScore}% MATCH` : 'UNSCORED';
-    }
-
-    function details(opp) {
-      return { ...DEFAULT_JOB_DETAILS, ...(opp.jobDetails || {}) };
+      return (a.orderIndex || 0) - (b.orderIndex || 0);
     }
 
     function announceToScreenReader(message) {
       const el = $('sr-announcements');
-      if (el) {
-        el.textContent = '';
-        setTimeout(() => { el.textContent = message; }, 50);
+      if (el) el.textContent = message;
+    }
+
+    function refreshIcons() {
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
       }
     }
 
-    let iconRefreshPending = false;
-    function refreshIcons() {
-      if (iconRefreshPending) return;
-      iconRefreshPending = true;
-      requestAnimationFrame(() => {
-        iconRefreshPending = false;
-        if (window.lucide && typeof lucide.createIcons === 'function') {
-          lucide.createIcons();
-        }
-      });
-    }
-
-    let toastTimeout = null;
     function showToast(msg, isError = false) {
-      const toast = $('toast');
-      const msgEl = $('toast-msg');
-      const iconEl = $('toast-icon');
-
-      msgEl.textContent = msg;
-      iconEl.className = isError ? 'text-red-400 flex-shrink-0' : 'text-emerald-400 flex-shrink-0';
-      iconEl.innerHTML = isError
-        ? '<i data-lucide="alert-circle" class="w-4 h-4"></i>'
-        : '<i data-lucide="check-circle" class="w-4 h-4"></i>';
-
-      toast.classList.toggle('border-red-500/80', isError);
-      toast.classList.toggle('bg-red-950/90', isError);
-      toast.classList.toggle('border-slate-700', !isError);
-      toast.classList.toggle('bg-slate-850', !isError);
-
-      toast.classList.remove('opacity-0', 'pointer-events-none');
-      clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => {
-        toast.classList.add('opacity-0', 'pointer-events-none');
-      }, isError ? 5000 : 2800);
-
-      announceToScreenReader((isError ? 'Error: ' : '') + msg);
+      const container = $('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = `px-3.5 py-2 rounded-md text-xs shadow-lg flex items-center gap-2 border pointer-events-auto animation-fade-in ${
+        isError ? 'bg-red-950/90 text-red-200 border-red-800' : 'bg-slate-900/95 text-slate-100 border-slate-700'
+      }`;
+      toast.innerHTML = `
+        <i data-lucide="${isError ? 'alert-circle' : 'check'}" class="w-3.5 h-3.5 ${isError ? 'text-red-400' : 'text-emerald-400'}" aria-hidden="true"></i>
+        <span>${esc(msg)}</span>
+      `;
+      container.appendChild(toast);
       refreshIcons();
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.25s ease-out';
+        setTimeout(() => toast.remove(), 250);
+      }, 3000);
     }
-
-    $('toast-close')?.addEventListener('click', () => {
-      $('toast').classList.add('opacity-0', 'pointer-events-none');
-    });
 
     let activeModalResolve = null;
     function showConfirmModal({ title, message, confirmText = 'Delete', isDestructive = true }) {
       return new Promise((resolve) => {
-        activeModalResolve = resolve;
         const modal = $('modal-container');
         $('modal-title').textContent = title;
         $('modal-message').textContent = message;
         const confirmBtn = $('modal-btn-confirm');
         confirmBtn.textContent = confirmText;
-        confirmBtn.className = isDestructive
-          ? 'px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded text-xs font-semibold shadow-sm transition'
-          : 'px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-semibold shadow-sm transition';
+        confirmBtn.className = `px-3 py-1.5 rounded text-xs font-medium shadow-sm transition ${
+          isDestructive ? 'bg-red-600 hover:bg-red-500 text-white' : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+        }`;
+
         modal.classList.remove('hidden');
+        refreshIcons();
         confirmBtn.focus();
+
+        activeModalResolve = resolve;
+
+        const onCancel = () => { cleanup(); resolve(false); };
+        const onConfirm = () => { cleanup(); resolve(true); };
+
+        function cleanup() {
+          modal.classList.add('hidden');
+          $('modal-btn-cancel').removeEventListener('click', onCancel);
+          confirmBtn.removeEventListener('click', onConfirm);
+          activeModalResolve = null;
+        }
+
+        $('modal-btn-cancel').addEventListener('click', onCancel, { once: true });
+        confirmBtn.addEventListener('click', onConfirm, { once: true });
       });
     }
 
-    $('modal-btn-confirm')?.addEventListener('click', () => {
-      $('modal-container').classList.add('hidden');
-      if (activeModalResolve) activeModalResolve(true);
-    });
-    $('modal-btn-cancel')?.addEventListener('click', () => {
-      $('modal-container').classList.add('hidden');
-      if (activeModalResolve) activeModalResolve(false);
-    });
-
-    // ================= RESILIENT API LAYER =================
-    let pendingSaves = 0;
     function setSaveStatus(text, statusType = 'normal') {
       const el = $('save-status');
       if (!el) return;
       el.textContent = text;
-      el.className = `text-[11px] font-mono ${
-        statusType === 'error' ? 'text-red-400 font-semibold' : statusType === 'saving' ? 'text-amber-400' : 'text-slate-400'
+      el.className = `text-[11px] font-mono transition ${
+        statusType === 'saving' ? 'text-amber-400' : statusType === 'error' ? 'text-red-400' : 'text-slate-400'
       }`;
     }
 
     async function api(method, url, payload) {
-      pendingSaves++;
-      if (method !== 'GET') setSaveStatus('Saving changes…', 'saving');
+      setSaveStatus('Saving...', 'saving');
       try {
         const res = await fetch(url, {
           method,
-          headers: payload !== undefined ? { 'Content-Type': 'application/json' } : {},
-          body: payload !== undefined ? JSON.stringify(payload) : undefined,
+          headers: payload ? { 'Content-Type': 'application/json' } : {},
+          body: payload ? JSON.stringify(payload) : undefined
         });
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
           throw new Error(errData.error || `HTTP ${res.status}`);
         }
-        if (--pendingSaves === 0 && method !== 'GET') {
-          setSaveStatus('Saved to database', 'normal');
-        }
+        setSaveStatus('Saved to database');
         return await res.json();
       } catch (err) {
-        pendingSaves = Math.max(0, pendingSaves - 1);
-        setSaveStatus('Save failed', 'error');
-        showToast(`Could not save: ${err.message}`, true);
-        return null;
+        setSaveStatus('Save error', 'error');
+        showToast(err.message, true);
+        throw err;
       }
     }
 
@@ -779,7 +734,7 @@
       const entry = saveQueue.get(opp.id) || { fields: {}, timer: null };
       Object.assign(entry.fields, fields);
       clearTimeout(entry.timer);
-      entry.timer = setTimeout(() => flushSave(opp.id), 400);
+      entry.timer = setTimeout(() => flushSave(opp.id), 350);
       saveQueue.set(opp.id, entry);
     }
 
@@ -797,93 +752,26 @@
     window.addEventListener('pagehide', flushAllSaves);
     window.addEventListener('beforeunload', flushAllSaves);
 
-    // ================= REUSABLE UI PRIMITIVES =================
-    const UI = {
-      Badge({ label, variant = 'slate', dot = false, size = 'xs', className = '' }) {
-        const variantStyles = {
-          slate: 'bg-slate-800 border-slate-700 text-slate-300',
-          emerald: 'bg-emerald-950/80 border-emerald-800/80 text-emerald-300',
-          blue: 'bg-blue-950/80 border-blue-800/80 text-blue-300',
-          indigo: 'bg-indigo-950/80 border-indigo-800/80 text-indigo-300',
-          purple: 'bg-purple-950/80 border-purple-800/80 text-purple-300',
-          amber: 'bg-amber-950/80 border-amber-800/80 text-amber-300',
-          red: 'bg-red-950/80 border-red-800/80 text-red-300',
-        };
-        const dotStyles = {
-          slate: 'bg-slate-400', emerald: 'bg-emerald-400', blue: 'bg-blue-400',
-          indigo: 'bg-indigo-400', purple: 'bg-purple-400', amber: 'bg-amber-400', red: 'bg-red-400',
-        };
-        return `
-          <span class="inline-flex items-center gap-1 font-mono font-medium border rounded px-1.5 py-0.5 ${size === 'xs' ? 'text-[10px]' : 'text-xs'} ${variantStyles[variant] || variantStyles.slate} ${className}">
-            ${dot ? `<span class="w-1.5 h-1.5 rounded-full ${dotStyles[variant] || 'bg-slate-400'}" aria-hidden="true"></span>` : ''}
-            <span>${esc(label)}</span>
-          </span>
-        `;
-      },
-
-      EmptyState({ icon = 'inbox', title, description, actionBtn = '' }) {
-        return `
-          <div class="flex flex-col items-center justify-center p-6 text-center rounded-xl border border-dashed border-slate-800 bg-slate-900/30 text-slate-400 space-y-2.5 my-2">
-            <div class="w-10 h-10 rounded-full bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-400">
-              <i data-lucide="${icon}" class="w-5 h-5" aria-hidden="true"></i>
-            </div>
-            <div>
-              <p class="text-xs font-semibold text-slate-200">${esc(title)}</p>
-              ${description ? `<p class="text-[11px] text-slate-400 max-w-xs mt-0.5">${esc(description)}</p>` : ''}
-            </div>
-            ${actionBtn ? `<div class="pt-1">${actionBtn}</div>` : ''}
-          </div>
-        `;
-      },
-
-      SkeletonCard() {
-        return `
-          <div class="p-3.5 rounded-lg border border-slate-800 bg-slate-850/40 space-y-2.5 animate-pulse">
-            <div class="flex justify-between items-center">
-              <div class="h-3 w-20 bg-slate-800 rounded"></div>
-              <div class="h-4 w-14 bg-slate-800 rounded"></div>
-            </div>
-            <div class="h-4 w-40 bg-slate-800 rounded"></div>
-            <div class="flex gap-2">
-              <div class="h-4 w-16 bg-slate-800 rounded"></div>
-              <div class="h-4 w-20 bg-slate-800 rounded"></div>
-            </div>
-          </div>
-        `;
-      },
-
-      WorkpadSection({ id, icon, iconColor, title, badge = null, children, isOpen = true }) {
-        return `
-          <section class="bg-slate-950/60 border border-slate-800 rounded-xl p-3.5 space-y-3" aria-labelledby="workpad-heading-${id}">
-            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
-              <div class="flex items-center gap-2">
-                <i data-lucide="${icon}" class="w-3.5 h-3.5 ${iconColor}" aria-hidden="true"></i>
-                <h3 id="workpad-heading-${id}" class="text-xs font-semibold tracking-wide text-slate-200 uppercase">${esc(title)}</h3>
-                ${badge !== null ? `<span class="text-[10px] font-mono px-1.5 rounded-full bg-slate-800 text-slate-300 font-bold">${badge}</span>` : ''}
-              </div>
-              <button class="text-slate-400 hover:text-slate-200 p-0.5 rounded transition" data-action="toggle-workpad" data-tool="${id}" aria-label="Toggle ${esc(title)} section">
-                <i data-lucide="${isOpen ? 'chevron-up' : 'chevron-down'}" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-            <div class="space-y-3">
-              ${children}
-            </div>
-          </section>
-        `;
-      }
-    };
-
-    // ================= KANBAN COMPONENTS =================
+    // ================= KANBAN CARD & BOARD =================
     function renderKanbanCard(opp, index, stageId, isSelected) {
-      const scored = opp.matchScore > 0;
-      const proof = opp.proofOfWork || {};
       const cardClass = isSelected
         ? 'bg-emerald-950/30 border-emerald-500/80 shadow-lg shadow-emerald-950/40 ring-1 ring-emerald-500/40'
         : 'bg-slate-850/85 hover:bg-slate-800/90 border-slate-700/60 hover:border-slate-600';
 
-      const taskCount = (opp.tasks || []).length;
-      const tasksDone = (opp.tasks || []).filter((t) => t.isCompleted).length;
-      const compLabel = opp.value ? `$${Math.round(opp.value / 1000)}k` : '';
+      const companyName = opp.company || 'Company';
+      const companyDesc = opp.companyDescription || opp.title || 'Click to add description...';
+      const contacts = opp.contacts || [];
+      const primaryContact = contacts[0] || (opp.contactName ? { name: opp.contactName, role: opp.contactRole || 'Recruiter' } : null);
+
+      const comms = opp.comms || [];
+      const latestComm = comms[0] || null;
+
+      const methodIcons = {
+        audio: 'phone',
+        video: 'video',
+        email: 'mail',
+        other: 'message-square'
+      };
 
       return `
         <article
@@ -892,96 +780,96 @@
           data-stage-id="${esc(stageId)}"
           role="button"
           tabindex="0"
-          aria-label="${esc(opp.company)} - ${esc(opp.title)}, Target ${esc(compLabel)}. Press Enter to inspect."
+          aria-label="${esc(companyName)}. Press Enter to inspect."
         >
+          <!-- Top: Company Name Up Top -->
           <div class="flex items-start justify-between gap-2">
             <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="text-[10px] uppercase font-mono font-semibold tracking-wider text-emerald-400 truncate max-w-[140px]">${esc(opp.company || 'Company')}</span>
-                <span class="text-[9px] font-mono px-1.5 rounded border font-bold ${scored ? 'bg-emerald-950/90 border-emerald-800 text-emerald-300' : 'bg-slate-800 border-slate-700 text-slate-400'}">
-                  ${esc(matchLabel(opp))}
-                </span>
-              </div>
-              <h4 class="text-xs font-semibold text-white mt-1 tracking-tight truncate">${esc(opp.title || 'Role')}</h4>
+              <h3 class="text-sm font-bold text-white tracking-tight truncate">${esc(companyName)}</h3>
+              <!-- One line description of what company does -->
+              <p class="text-xs text-slate-300 mt-1 line-clamp-2 leading-relaxed">${esc(companyDesc)}</p>
             </div>
 
             <div class="flex flex-col items-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition flex-shrink-0" role="group" aria-label="Card order controls">
               <button
                 class="p-0.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded transition"
                 data-action="move-up"
-                aria-label="Move ${esc(opp.company)} ${esc(opp.title)} up in column"
+                aria-label="Move ${esc(companyName)} up in column"
               >
                 <i data-lucide="chevron-up" class="w-3.5 h-3.5" aria-hidden="true"></i>
               </button>
               <button
                 class="p-0.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded transition"
                 data-action="move-down"
-                aria-label="Move ${esc(opp.company)} ${esc(opp.title)} down in column"
+                aria-label="Move ${esc(companyName)} down in column"
               >
                 <i data-lucide="chevron-down" class="w-3.5 h-3.5" aria-hidden="true"></i>
               </button>
             </div>
           </div>
 
-          <div class="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-            <div class="flex items-center gap-2">
-              ${compLabel ? `<span class="font-mono text-emerald-400 font-semibold">${esc(compLabel)}</span>` : ''}
-              ${taskCount > 0 ? `
-                <span class="flex items-center gap-1 font-mono text-[10px] ${tasksDone === taskCount ? 'text-emerald-400' : 'text-slate-400'}">
-                  <i data-lucide="check-square" class="w-3 h-3" aria-hidden="true"></i>
-                  ${tasksDone}/${taskCount}
+          <!-- Bottom: Points of Contact & Contact History Summary -->
+          <div class="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+            <div class="truncate max-w-[190px]">
+              ${primaryContact ? `
+                <span class="flex items-center gap-1 text-slate-300 truncate">
+                  <i data-lucide="user" class="w-3 h-3 text-emerald-400 flex-shrink-0" aria-hidden="true"></i>
+                  <span class="truncate">${esc(primaryContact.name)}</span>
+                  ${primaryContact.role ? `<span class="text-slate-500 font-normal truncate">• ${esc(primaryContact.role)}</span>` : ''}
                 </span>
-              ` : ''}
+              ` : `
+                <span class="text-slate-500 italic">No contacts set</span>
+              `}
             </div>
 
-            ${proof.status ? `
-              <span class="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded border ${
-                proof.status === 'ready'
-                  ? 'bg-purple-950/80 border-purple-800 text-purple-300'
-                  : proof.status === 'drafting'
-                  ? 'bg-blue-950/80 border-blue-800 text-blue-300'
-                  : 'bg-slate-800/80 border-slate-700 text-slate-400'
-              }">
-                ${esc(proof.status)}
-              </span>
-            ` : ''}
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              ${latestComm ? `
+                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded border bg-slate-900 border-slate-700 text-slate-300 flex items-center gap-1">
+                  <i data-lucide="${methodIcons[latestComm.method] || 'message-square'}" class="w-2.5 h-2.5 text-blue-400" aria-hidden="true"></i>
+                  <span>${esc(latestComm.date ? latestComm.date.slice(5) : 'Logged')}</span>
+                </span>
+              ` : `
+                <span class="text-[10px] font-mono text-slate-500">0 contacts</span>
+              `}
+            </div>
           </div>
         </article>
       `;
     }
 
-    function renderKanbanColumn(stage, stageOpps, stageSum) {
+    function renderKanbanColumn(stage, stageOpps) {
       const selectedId = store.state.selectedOppId;
       const count = stageOpps.length;
-      const formattedSum = stageSum > 0 ? `$${Math.round(stageSum / 1000)}k` : '$0';
 
       const cardsHtml = count === 0
-        ? UI.EmptyState({
-            icon: 'folder-open',
-            title: 'No roles here',
-            description: `Drop or add target applications into ${stage.name}`
-          })
+        ? `
+          <div class="p-6 rounded-lg border border-dashed border-slate-800 text-center text-slate-500 space-y-1 my-auto">
+            <i data-lucide="folder-open" class="w-6 h-6 mx-auto text-slate-600 mb-1" aria-hidden="true"></i>
+            <p class="text-xs font-medium text-slate-400">No opportunities</p>
+            <p class="text-[11px] text-slate-500">Drop or add companies into ${esc(stage.name)}</p>
+          </div>
+        `
         : stageOpps.map((opp, idx) => renderKanbanCard(opp, idx, stage.id, opp.id === selectedId)).join('');
 
       return `
         <section
-          class="flex-shrink-0 w-72 md:w-80 flex flex-col max-h-full rounded-xl bg-slate-900/60 border ${stage.border} backdrop-blur shadow-sm select-none"
-          aria-labelledby="col-title-${stage.id}"
+          class="flex-1 min-w-[280px] max-w-[420px] flex flex-col bg-slate-900/50 border ${stage.border} rounded-xl overflow-hidden backdrop-blur-sm"
+          data-stage-id="${esc(stage.id)}"
+          aria-label="${esc(stage.name)} column, ${count} opportunities"
         >
-          <div class="p-3 border-b border-slate-800 flex items-center justify-between">
-            <div class="flex items-center gap-2 min-w-0">
-              <span class="w-2.5 h-2.5 rounded-full ${STAGE_DOT_CLASSES[stage.color] || 'bg-slate-400'}" aria-hidden="true"></span>
-              <h3 id="col-title-${stage.id}" class="text-xs font-semibold text-slate-100 tracking-tight truncate">${esc(stage.name)}</h3>
-              <span class="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold border border-slate-700/60">
+          <!-- Stage Header -->
+          <div class="p-3 md:px-4 md:py-3 border-b border-slate-800/80 bg-slate-900/70 flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full ${STAGE_DOT_CLASSES[stage.color] || 'bg-slate-400'}" aria-hidden="true"></span>
+              <h2 class="text-xs font-semibold text-slate-200 uppercase tracking-wider font-mono">${esc(stage.name)}</h2>
+              <span class="text-[11px] font-mono font-medium px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700/80 text-slate-300">
                 ${count}
               </span>
             </div>
-            <span class="text-[11px] font-mono font-medium text-emerald-400" aria-label="Stage sum total">
-              ${esc(formattedSum)}
-            </span>
           </div>
 
-          <div class="cards-list flex-1 overflow-y-auto p-2.5 space-y-2" data-stage="${esc(stage.id)}" role="list" aria-label="${esc(stage.name)} opportunities">
+          <!-- Cards Scroll Area -->
+          <div class="flex-1 overflow-y-auto p-3 space-y-2.5 min-h-[140px]" data-stage-dropzone="${esc(stage.id)}">
             ${cardsHtml}
           </div>
         </section>
@@ -990,433 +878,31 @@
 
     function renderBoard() {
       const container = $('board-container');
-      const { opportunities, searchQuery, stageFilter, isLoading } = store.state;
+      const { opportunities, searchQuery, stageFilter } = store.state;
 
-      if (isLoading) {
-        container.innerHTML = STAGES.map(() => `
-          <div class="flex-shrink-0 w-80 rounded-xl bg-slate-900/40 border border-slate-800 p-3 space-y-3">
-            <div class="h-5 w-32 bg-slate-800 rounded animate-pulse"></div>
-            ${UI.SkeletonCard()}
-            ${UI.SkeletonCard()}
-          </div>
-        `).join('');
-        return;
-      }
-
-      const q = searchQuery.trim().toLowerCase();
-      const filtered = opportunities.filter((opp) => {
+      const q = searchQuery.toLowerCase().trim();
+      const filtered = opportunities.filter((o) => {
+        if (stageFilter !== 'all' && o.stageId !== stageFilter) return false;
         if (!q) return true;
-        return [opp.title, opp.company, opp.contactName, opp.hiringManagerName]
-          .some((val) => val && val.toLowerCase().includes(q));
+        const comp = (o.company || '').toLowerCase();
+        const desc = (o.companyDescription || '').toLowerCase();
+        const title = (o.title || '').toLowerCase();
+        const contactsText = (o.contacts || []).map(c => `${c.name} ${c.role}`).join(' ').toLowerCase();
+        return comp.includes(q) || desc.includes(q) || title.includes(q) || contactsText.includes(q);
       });
 
-      let totalPipeline = 0;
-      const stageBuckets = new Map(STAGES.map((s) => [s.id, []]));
-
-      filtered.forEach((opp) => {
-        const list = stageBuckets.get(opp.stageId);
-        if (list) list.push(opp);
-        totalPipeline += Number(opp.value || 0);
-      });
-
-      $('pipeline-total-val').textContent = `$${Math.round(totalPipeline / 1000)}k Target Pipeline`;
-
-      const visibleStages = stageFilter === 'all'
-        ? STAGES
-        : STAGES.filter((s) => s.id === stageFilter);
-
-      const existingLists = container.querySelectorAll('.cards-list');
-      const scrollPositions = new Map();
-      existingLists.forEach((el) => {
-        if (el.dataset.stage) scrollPositions.set(el.dataset.stage, el.scrollTop);
-      });
-
-      if (opportunities.length === 0) {
-        container.innerHTML = `
-          <div class="m-auto max-w-lg w-full p-6 text-center bg-slate-900/60 border border-slate-800 rounded-2xl shadow-xl space-y-4">
-            <div class="w-12 h-12 rounded-2xl bg-emerald-600/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 mx-auto">
-              <i data-lucide="sparkles" class="w-6 h-6"></i>
-            </div>
-            <div>
-              <h2 class="text-base font-semibold text-white tracking-tight">Your Pipeline is Ready &amp; Clean</h2>
-              <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto leading-relaxed">
-                All fake demo data has been removed. You can now tailor your career parameters and add your real target companies.
-              </p>
-            </div>
-            <div class="flex items-center justify-center gap-3 pt-2">
-              <button id="btn-empty-param-edit" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
-                <i data-lucide="sliders" class="w-3.5 h-3.5 text-emerald-400"></i>
-                <span>Configure Profile &amp; API Key</span>
-              </button>
-              <button id="btn-empty-add-opp" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                <span>Add First Application</span>
-              </button>
-            </div>
-          </div>
-        `;
-        $('btn-empty-param-edit')?.addEventListener('click', openParameterModal);
-        $('btn-empty-add-opp')?.addEventListener('click', createOpportunity);
-        refreshIcons();
-        return;
-      }
-
-      if (filtered.length === 0 && q) {
-        container.innerHTML = `
-          <div class="m-auto max-w-md w-full">
-            ${UI.EmptyState({
-              icon: 'search-x',
-              title: 'No matching opportunities',
-              description: `No roles match "${q}".`,
-              actionBtn: `<button id="btn-reset-search" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded text-xs transition">Clear filter</button>`
-            })}
-          </div>
-        `;
-        $('btn-reset-search')?.addEventListener('click', () => {
-          store.set({ searchQuery: '' });
-          $('search-input').value = '';
-          $('btn-clear-search').classList.add('hidden');
-          renderBoard();
-        });
-        refreshIcons();
-        return;
-      }
-
-      container.innerHTML = visibleStages.map((stage) => {
-        const stageOpps = (stageBuckets.get(stage.id) || []).sort(byOrderIndex);
-        const stageSum = stageOpps.reduce((sum, o) => sum + Number(o.value || 0), 0);
-        return renderKanbanColumn(stage, stageOpps, stageSum);
+      const colsHtml = STAGES.map((stage) => {
+        const stageOpps = filtered
+          .filter((o) => (o.stageId || 'targeted') === stage.id)
+          .sort(byOrderIndex);
+        return renderKanbanColumn(stage, stageOpps);
       }).join('');
 
-      container.querySelectorAll('.cards-list').forEach((el) => {
-        const saved = scrollPositions.get(el.dataset.stage);
-        if (saved !== undefined) el.scrollTop = saved;
-      });
-
+      container.innerHTML = colsHtml;
       refreshIcons();
     }
 
-    // ================= COCKPIT WORKPADS =================
-    function storyById(id) {
-      if (!store.state.profile || !store.state.profile.stories) return null;
-      return store.state.profile.stories.find((s) => s.id === id);
-    }
-
-    function renderMatchWorkpad(opp) {
-      const m = opp.matchDetails || {};
-      const strengths = m.strengths || [];
-      const gaps = m.gaps || [];
-      const isTemplate = details(opp).isTemplate === true;
-      const stories = (m.stories || []).map(storyById).filter(Boolean);
-
-      const content = `
-        <div class="space-y-3">
-          <div class="flex items-center justify-between text-xs">
-            <span class="text-slate-400">Match Evidence:</span>
-            <span class="font-mono text-emerald-400 font-bold">${opp.matchScore > 0 ? `${opp.matchScore}% Match` : 'Unscored'}</span>
-          </div>
-
-          <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden" role="progressbar" aria-valuenow="${opp.matchScore || 0}" aria-valuemin="0" aria-valuemax="100">
-            <div class="bg-gradient-to-r from-emerald-500 to-teal-400 h-1.5 rounded-full transition-all duration-300" style="width: ${Math.min(100, Math.max(0, opp.matchScore || 0))}%"></div>
-          </div>
-
-          ${isTemplate ? `
-            <div class="p-2.5 rounded bg-blue-950/40 border border-blue-800/60 text-[11px] text-blue-300 flex items-center justify-between">
-              <span>Template role text. Paste genuine posting to score.</span>
-              <button class="px-2 py-0.5 bg-blue-600/30 hover:bg-blue-600/50 rounded font-medium text-[10px] transition" data-action="open-browser">
-                Open Posting
-              </button>
-            </div>
-          ` : ''}
-
-          <div class="space-y-1.5">
-            <div class="text-[10px] font-mono uppercase text-emerald-400 font-semibold tracking-wider">Strengths (${strengths.length})</div>
-            ${strengths.length === 0 ? '<p class="text-[11px] text-slate-500 italic">No verified strengths matched yet.</p>' : ''}
-            ${strengths.map((s) => `
-              <div class="p-2 rounded bg-slate-900/80 border border-slate-800/80 text-xs text-slate-200">
-                <div class="flex items-start gap-1.5">
-                  <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" aria-hidden="true"></i>
-                  <span class="leading-snug">${esc(s)}</span>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-
-          <div class="space-y-1.5">
-            <div class="text-[10px] font-mono uppercase text-amber-400 font-semibold tracking-wider">Gaps &amp; Mitigations (${gaps.length})</div>
-            ${gaps.length === 0 ? '<p class="text-[11px] text-slate-500 italic">No recognized gaps flagged.</p>' : ''}
-            ${gaps.map((g) => `
-              <div class="p-2 rounded bg-slate-900/80 border border-slate-800/80 text-xs text-slate-300">
-                <div class="flex items-start gap-1.5">
-                  <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-amber-400 flex-shrink-0 mt-0.5" aria-hidden="true"></i>
-                  <span class="leading-snug">${esc(g)}</span>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-
-          ${stories.length > 0 ? `
-            <div class="space-y-1.5 pt-1">
-              <div class="text-[10px] font-mono uppercase text-purple-400 font-semibold tracking-wider">Lead With Verified Story</div>
-              ${stories.map((st) => `
-                <div class="p-2.5 rounded bg-purple-950/20 border border-purple-800/40 text-xs flex items-center justify-between">
-                  <div class="min-w-0 pr-2">
-                    <p class="font-semibold text-purple-200 truncate">${esc(st.title)}</p>
-                    <p class="text-[10px] text-purple-300/70 font-mono">${esc(st.company || '')} • ${esc(st.role || '')}</p>
-                  </div>
-                  <button class="px-2 py-1 bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 rounded text-[10px] font-medium transition flex-shrink-0" data-action="add-story" data-story="${esc(st.id)}">
-                    Attach Story
-                  </button>
-                </div>
-              `).join('')}
-            </div>
-          ` : ''}
-        </div>
-      `;
-
-      return UI.WorkpadSection({
-        id: 'match',
-        icon: 'target',
-        iconColor: 'text-emerald-400',
-        title: 'Match & Gap Analysis',
-        badge: opp.matchScore > 0 ? `${opp.matchScore}%` : null,
-        children: content,
-        isOpen: store.state.toolDock.match
-      });
-    }
-
-    function renderArtifactsWorkpad(opp) {
-      const proof = opp.proofOfWork || {};
-      const link = safeUrl(proof.artifactUrl);
-
-      const content = `
-        <div class="space-y-2.5 text-xs">
-          <div>
-            <label for="proof-name" class="text-[10px] font-medium text-slate-400 block mb-1">ARTIFACT DELIVERABLE NAME</label>
-            <input id="proof-name" type="text" data-proof="artifactName" value="${esc(proof.artifactName || '')}" placeholder="e.g. 30-60-90 Day Execution Plan" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200 focus:outline-none focus:ring-1 focus:ring-purple-500">
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label for="proof-type" class="text-[10px] font-medium text-slate-400 block mb-1">TYPE</label>
-              <input id="proof-type" type="text" data-proof="artifactType" value="${esc(proof.artifactType || '')}" placeholder="One-pager, Slide Deck" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200 focus:outline-none focus:ring-1 focus:ring-purple-500">
-            </div>
-            <div>
-              <label for="proof-status" class="text-[10px] font-medium text-slate-400 block mb-1">STATUS</label>
-              <select id="proof-status" data-proof="status" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200 focus:outline-none focus:ring-1 focus:ring-purple-500 cursor-pointer">
-                ${PROOF_STATUSES.map((st) => `<option value="${st}" ${proof.status === st ? 'selected' : ''}>${esc(st.toUpperCase())}</option>`).join('')}
-              </select>
-            </div>
-          </div>
-          <div>
-            <label for="proof-url" class="text-[10px] font-medium text-slate-400 block mb-1">PUBLIC LINK (URL)</label>
-            <div class="flex items-center gap-1.5">
-              <input id="proof-url" type="url" data-proof="artifactUrl" value="${esc(proof.artifactUrl || '')}" placeholder="https://..." class="flex-1 bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-slate-200 font-mono focus:outline-none focus:ring-1 focus:ring-purple-500">
-              ${link ? `
-                <a href="${link}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 border border-purple-500/50 rounded flex items-center gap-1 transition" aria-label="Open artifact in new tab">
-                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                </a>
-              ` : ''}
-            </div>
-          </div>
-        </div>
-      `;
-
-      return UI.WorkpadSection({
-        id: 'artifacts',
-        icon: 'cpu',
-        iconColor: 'text-purple-400',
-        title: 'Proof of Work & Artifacts',
-        badge: proof.status || null,
-        children: content,
-        isOpen: store.state.toolDock.artifacts
-      });
-    }
-
-    function renderNotesWorkpad(opp) {
-      const bank = store.state.profile ? store.state.profile.stories : [];
-      const notes = opp.notes || [];
-
-      const content = `
-        <div class="space-y-3">
-          ${bank.length > 0 ? `
-            <div>
-              <label for="story-picker" class="text-[10px] font-medium text-slate-400 block mb-1">ATTACH STAR STORY FROM BANK</label>
-              <div class="flex items-center gap-1.5">
-                <select id="story-picker" class="flex-1 bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer">
-                  ${bank.map((s) => `<option value="${esc(s.id)}">${esc(s.title)}</option>`).join('')}
-                </select>
-                <button class="px-2.5 py-1.5 bg-amber-600/30 hover:bg-amber-600/50 text-amber-300 border border-amber-500/40 rounded text-xs font-medium transition" data-action="add-story-picked">
-                  Add
-                </button>
-              </div>
-            </div>
-          ` : ''}
-
-          <div>
-            <label for="input-new-note" class="text-[10px] font-medium text-slate-400 block mb-1">ADD INTERVIEW PREP NOTE</label>
-            <div class="flex items-center gap-1.5">
-              <input id="input-new-note" type="text" placeholder="Note or prompt detail..." class="flex-1 bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500">
-              <button class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded text-xs font-medium transition" data-action="add-note">
-                Add
-              </button>
-            </div>
-          </div>
-
-          <div class="space-y-2 pt-1 max-h-60 overflow-y-auto">
-            ${notes.length === 0 ? '<p class="text-[11px] text-slate-500 italic">No notes or stories attached yet.</p>' : ''}
-            ${notes.map((n) => `
-              <div class="p-2.5 rounded bg-slate-900/80 border border-slate-800 text-xs space-y-1">
-                <div class="flex items-center justify-between">
-                  <span class="text-[10px] uppercase font-mono font-semibold text-amber-400">${esc(n.title)}</span>
-                  <span class="text-[10px] text-slate-400 font-mono">${esc(n.time || '')}</span>
-                </div>
-                <p class="text-slate-300 leading-relaxed">${esc(n.content)}</p>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `;
-
-      return UI.WorkpadSection({
-        id: 'notes',
-        icon: 'award',
-        iconColor: 'text-amber-400',
-        title: 'STAR Stories & Notes',
-        badge: notes.length,
-        children: content,
-        isOpen: store.state.toolDock.notes
-      });
-    }
-
-    function renderTasksWorkpad(opp) {
-      const tasks = opp.tasks || [];
-
-      const content = `
-        <div class="space-y-3">
-          <div>
-            <label for="input-new-task" class="text-[10px] font-medium text-slate-400 block mb-1">CREATE ACTIONABLE TASK</label>
-            <div class="flex items-center gap-1.5">
-              <input id="input-new-task" type="text" placeholder="e.g. Find hiring manager on LinkedIn..." class="flex-1 bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-slate-400">
-              <button class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded text-xs font-medium transition" data-action="add-task">
-                Add
-              </button>
-            </div>
-          </div>
-
-          <div class="space-y-1.5 pt-1 max-h-60 overflow-y-auto">
-            ${tasks.length === 0 ? '<p class="text-[11px] text-slate-500 italic">No open tasks.</p>' : ''}
-            ${tasks.map((t) => `
-              <div class="flex items-center justify-between p-2 rounded bg-slate-900/80 border border-slate-800 text-xs" data-task-id="${esc(t.id)}">
-                <label class="flex items-center gap-2 flex-1 cursor-pointer min-w-0 pr-2">
-                  <input type="checkbox" class="task-checkbox rounded bg-slate-800 border-slate-700 text-emerald-500 focus:ring-0 focus:ring-offset-0 cursor-pointer" ${t.isCompleted ? 'checked' : ''}>
-                  <span class="truncate ${t.isCompleted ? 'line-through text-slate-500' : 'text-slate-200'}">${esc(t.title)}</span>
-                </label>
-                <button class="text-slate-500 hover:text-red-400 p-1 rounded transition flex-shrink-0" data-action="delete-task" aria-label="Delete task: ${esc(t.title)}">
-                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                </button>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `;
-
-      return UI.WorkpadSection({
-        id: 'tasks',
-        icon: 'check-square',
-        iconColor: 'text-slate-300',
-        title: 'Actionable Tasks',
-        badge: tasks.length,
-        children: content,
-        isOpen: store.state.toolDock.tasks
-      });
-    }
-
-    function renderCommsWorkpad(opp) {
-      const comms = opp.comms || [];
-
-      const content = `
-        <div class="space-y-2">
-          ${comms.length === 0 ? '<p class="text-[11px] text-slate-500 italic">No communication logged yet.</p>' : ''}
-          ${comms.map((c) => `
-            <div class="p-2.5 rounded bg-slate-900/80 border border-slate-800 text-xs space-y-1">
-              <div class="flex items-center justify-between">
-                <span class="text-[10px] uppercase font-mono font-semibold text-blue-400">${esc(c.type || 'COMM')} • ${esc(c.recipient || 'Outreach')}</span>
-                <span class="text-[10px] text-slate-400 font-mono">${esc(c.time || '')}</span>
-              </div>
-              <p class="font-medium text-slate-200">${esc(c.title)}</p>
-              <p class="text-slate-300 text-[11px] leading-relaxed line-clamp-2">${esc(c.content)}</p>
-            </div>
-          `).join('')}
-        </div>
-      `;
-
-      return UI.WorkpadSection({
-        id: 'comms',
-        icon: 'message-square',
-        iconColor: 'text-slate-300',
-        title: 'Communications History',
-        badge: comms.length,
-        children: content,
-        isOpen: store.state.toolDock.comms
-      });
-    }
-
-    function renderToolWorkpads() {
-      const container = $('cockpit-tools-container');
-      const opp = getSelectedOpp();
-      if (!opp) {
-        container.innerHTML = '';
-        return;
-      }
-
-      const activeTools = WORKPAD_ORDER.filter((tool) => store.state.toolDock[tool]);
-      if (activeTools.length === 0) {
-        container.innerHTML = '<div class="text-xs text-slate-500 text-center py-4">Click tools above to open workpads.</div>';
-        return;
-      }
-
-      const renderers = {
-        match: renderMatchWorkpad,
-        artifacts: renderArtifactsWorkpad,
-        notes: renderNotesWorkpad,
-        tasks: renderTasksWorkpad,
-        comms: renderCommsWorkpad,
-      };
-
-      container.innerHTML = activeTools.map((t) => renderers[t] ? renderers[t](opp) : '').join('');
-      refreshIcons();
-    }
-
-    function updateToolDockPills() {
-      const opp = getSelectedOpp();
-      if (!opp) return;
-
-      const { isAuxOpen, activeAuxTab, toolDock } = store.state;
-
-      const isBrowserActive = isAuxOpen && activeAuxTab === 'browser';
-      $('tag-browser').className = `tool-tag-pill flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition border cursor-pointer ${
-        isBrowserActive ? 'bg-blue-600/30 text-blue-300 border-blue-500/60 shadow-sm' : 'bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700'
-      }`;
-
-      const isGmailActive = isAuxOpen && activeAuxTab === 'gmail';
-      $('tag-gmail').className = `tool-tag-pill flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition border cursor-pointer ${
-        isGmailActive ? 'bg-red-600/30 text-red-300 border-red-500/60 shadow-sm' : 'bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700'
-      }`;
-
-      COCKPIT_TOOLS.forEach((tool) => {
-        const btn = $(`tag-${tool}`);
-        if (!btn) return;
-        const active = toolDock[tool];
-        btn.className = `tool-tag-pill flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition border cursor-pointer ${
-          active ? 'bg-emerald-600/30 text-emerald-300 border-emerald-500/60 shadow-sm' : 'bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700'
-        }`;
-      });
-
-      $('tag-badge-notes').textContent = (opp.notes || []).length;
-      $('tag-badge-tasks').textContent = (opp.tasks || []).length;
-    }
-
-    // ================= COCKPIT DRAWER =================
+    // ================= OPPORTUNITY COCKPIT (COMPANY-FOCUSED) =================
     function openCockpit(oppId) {
       const opp = store.state.opportunities.find((o) => o.id === oppId);
       if (!opp) return;
@@ -1424,41 +910,36 @@
       store.state.lastFocusedElement = document.activeElement;
       store.set({ selectedOppId: oppId });
 
+      // 1. Company Name Up Top
       $('cockpit-company').value = opp.company || '';
-      $('cockpit-title-input').value = opp.title || '';
-      $('cockpit-stage-select').value = opp.stageId || 'wishlist';
-      $('cockpit-value-input').value = opp.value || (store.state.profile?.targetOte || 150000);
-      $('cockpit-hm-name').value = opp.hiringManagerName || '';
-      $('cockpit-hm-email').value = opp.hiringManagerEmail || '';
-      $('cockpit-contact-name').value = opp.contactName || '';
-      $('cockpit-contact-email').value = opp.contactEmail || '';
 
-      renderCockpitHeader(opp);
-      updateToolDockPills();
-      renderToolWorkpads();
+      // Stage Select
+      $('cockpit-stage-select').value = opp.stageId || 'targeted';
+
+      // 2. One line description of what the company does
+      $('cockpit-company-desc').value = opp.companyDescription || '';
+
+      // 3. Points of Contact
+      renderContactsList(opp);
+
+      // 4. Contact History
+      renderContactHistoryList(opp);
+      initHistoryForm(opp);
+      $('history-form-box')?.classList.add('hidden');
+      ?.classList.add('hidden');
+
+      // Render Board highlights
       renderBoard();
 
       $('cockpit-drawer').classList.remove('hidden');
-      $('current-state-label').textContent = `State 2: ${opp.company} Cockpit`;
-
-      announceToScreenReader(`Opened cockpit for ${opp.company} - ${opp.title}`);
+      announceToScreenReader(`Opened ${opp.company}`);
       refreshIcons();
-    }
-
-    function renderCockpitHeader(opp) {
-      $('cockpit-title').textContent = `${opp.company || 'Company'} — ${opp.title || 'Role'}`;
-      const pill = $('cockpit-match-pill');
-      pill.textContent = matchLabel(opp);
-      pill.className = `text-[11px] font-mono px-2 py-0.5 rounded-full font-bold ${
-        opp.matchScore > 0 ? 'bg-emerald-950 border border-emerald-700 text-emerald-400' : 'bg-slate-800 border border-slate-700 text-slate-400'
-      }`;
     }
 
     function closeCockpit() {
       $('cockpit-drawer').classList.add('hidden');
       closeAuxWorkspace();
       store.set({ selectedOppId: null });
-      $('current-state-label').textContent = 'State 1: All Opportunity Board';
       renderBoard();
 
       if (store.state.lastFocusedElement && typeof store.state.lastFocusedElement.focus === 'function') {
@@ -1466,284 +947,423 @@
       }
     }
 
-    // ================= AUXILIARY WORKSPACE =================
+    // ----------------- Points of Contact Sub-renderer -----------------
+    function renderContactsList(opp) {
+      const container = $('contacts-list-container');
+      const datalist = $('contacts-datalist');
+      if (!container) return;
+
+      const contacts = opp.contacts || [];
+
+      // Update datalist for history form
+      if (datalist) {
+        datalist.innerHTML = contacts.map(c => `<option value="${esc(c.name)}">${esc(c.role ? `${c.name} (${c.role})` : c.name)}</option>`).join('');
+      }
+
+      if (contacts.length === 0) {
+        container.innerHTML = `
+          <div class="p-3 rounded border border-dashed border-slate-800 text-center text-xs text-slate-500">
+            No points of contact yet. Click <span class="text-slate-300 font-medium">Add Contact</span>.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = contacts.map((c, idx) => {
+        const mode = c.contactType || (c.phone && !c.email ? 'phone' : 'email');
+        const isEmail = mode === 'email';
+        return `
+        <div class="p-2.5 bg-slate-850 border border-slate-750 rounded-md text-xs space-y-2 group" data-contact-idx="${idx}">
+          <div class="flex items-center gap-2">
+            <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <input
+                type="text"
+                placeholder="Name (e.g. Sarah Jenkins)"
+                value="${esc(c.name || '')}"
+                class="contact-name-input w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                data-idx="${idx}"
+              />
+              <input
+                type="text"
+                placeholder="Role (e.g. VP of Sales)"
+                value="${esc(c.role || '')}"
+                class="contact-role-input w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                data-idx="${idx}"
+              />
+            </div>
+            <button
+              type="button"
+              class="btn-delete-contact p-1 text-slate-500 hover:text-red-400 hover:bg-slate-800 rounded transition flex-shrink-0"
+              title="Remove contact"
+              data-idx="${idx}"
+              aria-label="Remove contact"
+            >
+              <i data-lucide="trash-2" class="w-3.5 h-3.5" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <!-- Togglable Email / Phone Row -->
+          <div class="flex items-center gap-1.5">
+            <div class="flex items-center rounded bg-slate-800 p-0.5 border border-slate-700 flex-shrink-0 text-[10px] font-medium font-mono">
+              <button
+                type="button"
+                class="btn-toggle-contact-mode px-2 py-0.5 rounded transition ${isEmail ? 'bg-emerald-600 text-white font-semibold' : 'text-slate-400 hover:text-slate-200'}"
+                data-idx="${idx}"
+                data-mode="email"
+              >
+                Email
+              </button>
+              <button
+                type="button"
+                class="btn-toggle-contact-mode px-2 py-0.5 rounded transition ${!isEmail ? 'bg-emerald-600 text-white font-semibold' : 'text-slate-400 hover:text-slate-200'}"
+                data-idx="${idx}"
+                data-mode="phone"
+              >
+                Phone
+              </button>
+            </div>
+            <div class="flex-1 relative flex items-center">
+              <i data-lucide="${isEmail ? 'mail' : 'phone'}" class="w-3 h-3 text-slate-400 absolute left-2 pointer-events-none" aria-hidden="true"></i>
+              <input
+                type="${isEmail ? 'email' : 'tel'}"
+                placeholder="${isEmail ? 'Email (e.g. sarah@company.com)' : 'Phone (e.g. +1 555-0123)'}"
+                value="${esc(isEmail ? (c.email || '') : (c.phone || ''))}"
+                class="contact-val-input w-full bg-slate-800 border border-slate-700 rounded pl-7 pr-2 py-1 text-slate-100 placeholder:text-slate-500 font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                data-idx="${idx}"
+                data-field="${isEmail ? 'email' : 'phone'}"
+              />
+            </div>
+          </div>
+        </div>
+      `;
+      }).join('');
+
+      refreshIcons();
+    }
+
+    // ----------------- Contact History Sub-renderer -----------------
+    function initHistoryForm(opp) {
+      const today = new Date().toISOString().slice(0, 10);
+      $('history-date-input').value = today;
+      $('history-summary-input').value = '';
+
+      const contacts = opp.contacts || [];
+      if (contacts.length > 0) {
+        $('history-contact-input').value = contacts[0].name || '';
+      } else {
+        $('history-contact-input').value = '';
+      }
+    }
+
+    function renderContactHistoryList(opp) {
+      const container = $('contact-history-list');
+      const countEl = $('contact-history-count');
+      if (!container) return;
+
+      const comms = opp.comms || [];
+      if (countEl) countEl.textContent = `${comms.length} interaction${comms.length === 1 ? '' : 's'}`;
+
+      if (comms.length === 0) {
+        container.innerHTML = `
+          <div class="p-3 rounded border border-dashed border-slate-800 text-center text-xs text-slate-500">
+            No contact history logged yet. Click <span class="text-slate-300 font-medium">+ New</span> to log an interaction.
+          </div>
+        `;
+        return;
+      }
+
+      const methodBadges = {
+        audio: { label: 'Audio', icon: 'phone', color: 'bg-amber-950/80 border-amber-800 text-amber-300' },
+        video: { label: 'Video', icon: 'video', color: 'bg-purple-950/80 border-purple-800 text-purple-300' },
+        email: { label: 'Email', icon: 'mail', color: 'bg-blue-950/80 border-blue-800 text-blue-300' },
+        other: { label: 'Other', icon: 'message-square', color: 'bg-slate-800 border-slate-700 text-slate-300' },
+      };
+
+      container.innerHTML = comms.map((item) => {
+        const badge = methodBadges[item.method] || methodBadges.other;
+        return `
+          <div class="p-2.5 rounded-lg bg-slate-850/90 border border-slate-800 text-xs space-y-1.5 group" data-comm-id="${esc(item.id)}">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-[9px] font-mono px-1.5 py-0.5 rounded border flex items-center gap-1 ${badge.color}">
+                  <i data-lucide="${badge.icon}" class="w-2.5 h-2.5" aria-hidden="true"></i>
+                  <span>${badge.label}</span>
+                </span>
+                <span class="font-medium text-slate-200">${esc(item.contactName || 'Point of Contact')}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] text-slate-400 font-mono">${esc(item.date || '')}</span>
+                <button
+                  type="button"
+                  class="btn-delete-comm opacity-0 group-hover:opacity-100 p-0.5 text-slate-500 hover:text-red-400 rounded transition"
+                  title="Delete entry"
+                  data-comm-id="${esc(item.id)}"
+                  aria-label="Delete interaction on ${esc(item.date)}"
+                >
+                  <i data-lucide="trash-2" class="w-3 h-3" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+            <p class="text-slate-300 text-[11px] leading-relaxed">${esc(item.summary || '')}</p>
+          </div>
+        `;
+      }).join('');
+
+      refreshIcons();
+    }
+
+    // ================= AUXILIARY WORKSPACE (BROWSER & GMAIL) =================
     function openAuxWorkspace(tab = 'browser') {
       const opp = getSelectedOpp();
       if (!opp) {
-        showToast('Select an application first to open outreach workspace', true);
+        showToast('Select an opportunity first to open tools', true);
         return;
       }
 
       store.set({ isAuxOpen: true, activeAuxTab: tab });
       $('aux-workspace').classList.remove('hidden');
-      $('aux-company-name').textContent = opp.company || 'Target Role';
+      $('aux-company-name').textContent = opp.company || 'Company';
 
       selectAuxTab(tab);
-      updateToolDockPills();
       refreshIcons();
     }
 
     function closeAuxWorkspace() {
       $('aux-workspace').classList.add('hidden');
       store.set({ isAuxOpen: false });
-      updateToolDockPills();
-    }
-
-    function toggleAuxWorkspace(tab) {
-      if (store.state.isAuxOpen && store.state.activeAuxTab === tab) {
-        closeAuxWorkspace();
-      } else {
-        openAuxWorkspace(tab);
-      }
     }
 
     function selectAuxTab(tab) {
       store.set({ activeAuxTab: tab });
-
       const isBrowser = tab === 'browser';
-      $('tab-btn-browser').setAttribute('aria-selected', isBrowser ? 'true' : 'false');
-      $('tab-btn-browser').className = `flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border transition ${
+
+      $('aux-browser-view').classList.toggle('hidden', !isBrowser);
+      $('aux-gmail-view').classList.toggle('hidden', isBrowser);
+
+      $('tab-btn-browser').setAttribute('aria-selected', isBrowser);
+      $('tab-btn-browser').className = `flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border focus-visible:ring-2 ${
         isBrowser ? 'bg-blue-600/20 text-blue-300 border-blue-500/40' : 'bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700'
       }`;
-      $('aux-browser-view').classList.toggle('hidden', !isBrowser);
 
-      const isGmail = tab === 'gmail';
-      $('tab-btn-gmail').setAttribute('aria-selected', isGmail ? 'true' : 'false');
-      $('tab-btn-gmail').className = `flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border transition ${
-        isGmail ? 'bg-red-600/20 text-red-300 border-red-500/40' : 'bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700'
+      $('tab-btn-gmail').setAttribute('aria-selected', !isBrowser);
+      $('tab-btn-gmail').className = `flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border focus-visible:ring-2 ${
+        !isBrowser ? 'bg-red-600/20 text-red-300 border-red-500/40' : 'bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-700'
       }`;
-      $('aux-gmail-view').classList.toggle('hidden', !isGmail);
 
       const opp = getSelectedOpp();
       if (opp) {
-        if (isBrowser) renderBrowserContent(opp);
-        if (isGmail && !store.state.draftDirty) applyGmailTemplate(store.state.currentTemplate, opp);
+        if (isBrowser) {
+          renderBrowserContent(opp);
+        } else {
+          setGmailTarget(store.state.gmailTarget);
+          if (!store.state.draftDirty) applyGmailTemplate('backchannel', opp);
+        }
       }
-      updateToolDockPills();
-      refreshIcons();
     }
 
-    function renderBrowserContent(opp) {
-      $('browser-url-input').value = opp.jobUrl || '';
-      const d = details(opp);
-
-      const container = $('browser-content');
-      container.innerHTML = `
-        <div class="max-w-3xl mx-auto space-y-6">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-            <div>
-              <span class="text-xs font-mono uppercase text-blue-400 font-semibold tracking-wider">${esc(opp.company)} Careers</span>
-              <h2 class="text-xl font-bold text-white tracking-tight mt-0.5">${esc(opp.title)}</h2>
-              <div class="flex items-center gap-3 mt-1.5 text-xs text-slate-400 font-mono">
-                <span>${esc(opp.location || 'Remote / Hybrid')}</span>
-                <span>•</span>
-                <span class="text-emerald-400 font-semibold">${esc(d.compensation || 'Competitive')}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <label for="job-text" class="text-xs font-semibold text-slate-300 uppercase font-mono tracking-wider">
-                Posting Requirements &amp; Description
-              </label>
-              <button class="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-medium transition flex items-center gap-1 active:scale-95" data-action="analyze">
-                <i data-lucide="target" class="w-3.5 h-3.5"></i>
-                <span>Score Against Profile</span>
-              </button>
-            </div>
-            <textarea
-              id="job-text"
-              class="w-full h-80 bg-slate-900/80 border border-slate-700/80 rounded-lg p-4 text-xs text-slate-200 leading-relaxed font-sans focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="Paste job posting text here to analyze against your background..."
-            >${esc(d.requirements || '')}</textarea>
-          </div>
-        </div>
-      `;
-      refreshIcons();
+    function getCompanyUrl(opp) {
+      if (!opp) return '';
+      if (opp.jobUrl && opp.jobUrl.trim()) return opp.jobUrl.trim();
+      if (opp.companyUrl && opp.companyUrl.trim()) return opp.companyUrl.trim();
+      const comp = (opp.company || '').trim();
+      if (comp.includes('.') && !comp.includes(' ')) {
+        return comp.startsWith('http') ? comp : `https://${comp}`;
+      }
+      return '';
     }
 
-    async function analyzePosting() {
-      const opp = getSelectedOpp();
-      if (!opp) return;
+    function loadBrowserUrl(url) {
+      const iframe = $('browser-iframe');
+      const urlInput = $('browser-url-input');
+      const openBtn = $('btn-open-posting');
+      if (!iframe) return;
 
-      const textarea = $('job-text');
-      const text = textarea ? textarea.value.trim() : '';
-
-      $('btn-clip-spinner').classList.remove('hidden');
-      $('btn-clip-icon').classList.add('hidden');
-      $('btn-clip-text').textContent = 'Analyzing…';
-      announceToScreenReader('Analyzing job description against candidate background');
-
-      const result = await api('POST', `/api/opportunities/${encodeURIComponent(opp.id)}/analyze`, { text });
-
-      $('btn-clip-spinner').classList.add('hidden');
-      $('btn-clip-icon').classList.remove('hidden');
-      $('btn-clip-text').textContent = 'Analyze Posting';
-
-      if (!result) return;
-
-      opp.matchScore = result.matchScore;
-      opp.matchDetails = result.matchDetails;
-      opp.jobDetails = result.jobDetails;
-
-      renderCockpitHeader(opp);
-      renderToolWorkpads();
-      renderBoard();
-      renderBrowserContent(opp);
-
-      showToast(`Analysis complete: scored ${opp.matchScore}% match`);
-    }
-
-    // ================= GMAIL STUDIO =================
-    let draftToken = 0;
-    async function applyGmailTemplate(type, opp = getSelectedOpp()) {
-      if (!opp) return;
-
-      store.set({ currentTemplate: type });
-      document.querySelectorAll('.gmail-template-btn').forEach((btn) => {
-        const isCurrent = btn.dataset.template === type;
-        btn.className = `gmail-template-btn px-2.5 py-1 rounded text-xs transition flex-shrink-0 border ${
-          isCurrent ? 'bg-red-600/30 text-red-200 border-red-500/60 font-semibold' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
-        }`;
-      });
-
-      const token = ++draftToken;
-      $('gmail-body-textarea').value = 'Generating authentic draft…';
-      $('gmail-body-textarea').setAttribute('disabled', 'true');
-
-      const draft = await api('POST', '/api/ai/draft', {
-        opportunityId: opp.id,
-        template: type,
-        target: store.state.currentGmailTarget
-      });
-
-      if (token !== draftToken) return;
-      $('gmail-body-textarea').removeAttribute('disabled');
-
-      if (!draft) {
-        $('gmail-body-textarea').value = '';
+      if (!url) {
+        iframe.src = 'about:blank';
+        if (openBtn) openBtn.href = '#';
         return;
       }
 
-      const toField = store.state.currentGmailTarget === 'hm'
-        ? (opp.hiringManagerEmail || '')
-        : (opp.contactEmail || '');
-      $('gmail-to-input').value = toField;
-      $('gmail-subject-input').value = draft.subject || '';
-      $('gmail-body-textarea').value = draft.body || '';
+      let targetUrl = url.trim();
+      if (!/^https?:\/\//i.test(targetUrl)) {
+        targetUrl = 'https://' + targetUrl;
+      }
 
-      store.set({ draftDirty: false });
-      runAntiSlopCheck();
-      announceToScreenReader(`Generated ${type} draft`);
+      if (urlInput) urlInput.value = targetUrl;
+      if (openBtn) openBtn.href = targetUrl;
+
+      // Load company website through the proxy endpoint
+      iframe.src = `/api/proxy?url=${encodeURIComponent(targetUrl)}`;
     }
 
-    function setGmailTarget(target) {
-      store.set({ currentGmailTarget: target });
-      const opp = getSelectedOpp();
+    function renderBrowserContent(opp) {
+      const url = getCompanyUrl(opp);
+      const urlInput = $('browser-url-input');
+      const openBtn = $('btn-open-posting');
+      const iframe = $('browser-iframe');
 
-      const isHM = target === 'hm';
-      $('btn-target-hm').className = `px-2.5 py-1 text-[11px] rounded font-medium transition ${
-        isHM ? 'bg-purple-600/30 text-purple-300 border border-purple-500/50' : 'bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700'
-      }`;
-      $('btn-target-recruiter').className = `px-2.5 py-1 text-[11px] rounded font-medium transition ${
-        !isHM ? 'bg-emerald-600/30 text-emerald-300 border border-emerald-500/50' : 'bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700'
-      }`;
+      if (urlInput) urlInput.value = url;
+      if (openBtn) openBtn.href = url || '#';
 
-      $('gmail-target-badge').textContent = isHM ? 'Hiring Manager (Direct)' : 'Talent Partner';
-      $('gmail-target-badge').className = isHM
-        ? 'text-[10px] font-mono px-2 py-0.5 rounded bg-purple-950/80 border border-purple-800/60 text-purple-300'
-        : 'text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-800/60 text-emerald-300';
-
-      if (opp) {
-        $('gmail-to-input').value = isHM ? (opp.hiringManagerEmail || '') : (opp.contactEmail || '');
-        if (!store.state.draftDirty) applyGmailTemplate(store.state.currentTemplate, opp);
+      if (url) {
+        loadBrowserUrl(url);
+      } else {
+        if (iframe) {
+          iframe.srcdoc = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <style>
+                body {
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                  background: #0b1120;
+                  color: #94a3b8;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  height: 100vh;
+                  margin: 0;
+                  text-align: center;
+                  padding: 2rem;
+                  box-sizing: border-box;
+                }
+                h3 { color: #f8fafc; font-size: 1.15rem; margin-bottom: 0.5rem; }
+                p { font-size: 0.85rem; max-width: 420px; line-height: 1.5; color: #cbd5e1; }
+                .hint { font-size: 0.75rem; color: #64748b; margin-top: 1rem; }
+              </style>
+            </head>
+            <body>
+              <h3>${esc(opp ? opp.company || 'Company' : 'Company')} Website</h3>
+              <p>Enter the company's website URL in the address bar above and click <strong>Go</strong> to browse their live website directly.</p>
+              <div class="hint">Or click "Open Full Page" to launch in an external window.</div>
+            </body>
+            </html>
+          `;
+        }
       }
     }
 
-    let lintTimer = null;
-    let lintToken = 0;
-    function runAntiSlopCheck() {
-      clearTimeout(lintTimer);
-      lintTimer = setTimeout(async () => {
-        const text = $('gmail-body-textarea').value;
-        const token = ++lintToken;
+    // ================= GMAIL STUDIO =================
+    async function applyGmailTemplate(type, opp = getSelectedOpp()) {
+      if (!opp) return;
+      try {
+        const draft = await api('POST', '/api/ai/draft', {
+          opportunityId: opp.id,
+          template: type,
+          target: store.state.gmailTarget
+        });
+        $('gmail-subject-input').value = draft.subject || '';
+        $('gmail-body-textarea').value = draft.body || '';
+        if (draft.to) $('gmail-to-input').value = draft.to;
+        store.set({ draftDirty: false });
+        runAntiSlopCheck();
+      } catch (err) {
+        showToast(`Template failed: ${err.message}`, true);
+      }
+    }
 
-        $('antislop-spinner').classList.remove('hidden');
-        $('antislop-icon').classList.add('hidden');
+    function setGmailTarget(target) {
+      store.set({ gmailTarget: target });
+      const isHm = target === 'hm';
+      $('btn-target-hm').className = `px-2.5 py-1 text-[11px] rounded font-medium transition ${
+        isHm ? 'bg-purple-600/30 text-purple-300 border border-purple-500/50' : 'bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700'
+      }`;
+      $('btn-target-recruiter').className = `px-2.5 py-1 text-[11px] rounded font-medium transition ${
+        !isHm ? 'bg-purple-600/30 text-purple-300 border border-purple-500/50' : 'bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700'
+      }`;
+      $('gmail-target-badge').textContent = isHm ? 'Hiring Manager' : 'Talent Partner';
 
-        const result = await fetch('/api/ai/anti-slop-linter', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text }),
-        }).then((r) => r.ok ? r.json() : null).catch(() => null);
-
-        $('antislop-spinner').classList.add('hidden');
-        $('antislop-icon').classList.remove('hidden');
-
-        if (!result || token !== lintToken) return;
-
-        const scoreEl = $('authenticity-score');
-        const dot = $('authenticity-dot');
-        const count = result.flaggedCount || 0;
-        const score = result.humanAuthenticityScore;
-
-        scoreEl.textContent = count > 0 ? `${score}% (${count} flagged)` : `${score}% Authentic`;
-        scoreEl.className = `font-mono font-semibold ${count > 0 ? 'text-amber-400' : 'text-emerald-400'}`;
-        dot.className = `w-2 h-2 rounded-full ${count > 0 ? 'bg-amber-400' : 'bg-emerald-400'}`;
-
-        const placeholders = (text.match(/\[[^\]]+\]/g) || []).length;
-        const pWarning = $('placeholder-warning');
-        if (placeholders > 0) {
-          pWarning.textContent = `${placeholders} blank [fields] need filling`;
-          pWarning.classList.remove('hidden');
-        } else {
-          pWarning.classList.add('hidden');
+      const opp = getSelectedOpp();
+      if (opp) {
+        const contacts = opp.contacts || [];
+        const contact = isHm ? contacts.find(c => /manager|lead|vp|head|director/i.test(c.role || '')) || contacts[0] : contacts.find(c => /recruiter|talent/i.test(c.role || '')) || contacts[1] || contacts[0];
+        if (contact && contact.email) {
+          $('gmail-to-input').value = contact.email;
         }
-      }, 250);
+      }
+    }
+
+    async function runAntiSlopCheck() {
+      const text = $('gmail-body-textarea').value;
+      if (!text.trim()) {
+        $('authenticity-score').textContent = 'Not checked';
+        $('authenticity-dot').className = 'w-2 h-2 rounded-full bg-slate-500';
+        $('placeholder-warning').classList.add('hidden');
+        return;
+      }
+
+      const spinner = $('antislop-spinner');
+      const icon = $('antislop-icon');
+      spinner.classList.remove('hidden');
+      icon.classList.add('hidden');
+
+      try {
+        const audit = await api('POST', '/api/ai/anti-slop-linter', { text });
+        const score = audit.humanAuthenticityScore || 85;
+        $('authenticity-score').textContent = `${score}/100`;
+
+        const dot = $('authenticity-dot');
+        if (score >= 80) {
+          dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+        } else if (score >= 60) {
+          dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+        } else {
+          dot.className = 'w-2 h-2 rounded-full bg-red-400';
+        }
+
+        const placeholderWarn = $('placeholder-warning');
+        if (audit.hasPlaceholders || /\[.*?\]/.test(text)) {
+          placeholderWarn.textContent = 'Contains [placeholder] text';
+          placeholderWarn.classList.remove('hidden');
+        } else {
+          placeholderWarn.classList.add('hidden');
+        }
+      } catch (err) {
+        // Fallback simple check
+        $('authenticity-score').textContent = 'Checked';
+        $('authenticity-dot').className = 'w-2 h-2 rounded-full bg-emerald-400';
+      } finally {
+        spinner.classList.add('hidden');
+        icon.classList.remove('hidden');
+        refreshIcons();
+      }
     }
 
     function openInGmail() {
-      const opp = getSelectedOpp();
-      if (!opp) return;
-
-      const to = $('gmail-to-input').value.trim();
-      const subject = $('gmail-subject-input').value;
-      const body = $('gmail-body-textarea').value;
-
-      const url = 'https://mail.google.com/mail/?view=cm&fs=1' +
-        `&to=${encodeURIComponent(to)}` +
-        `&su=${encodeURIComponent(subject)}` +
-        `&body=${encodeURIComponent(body)}`;
-
+      const to = encodeURIComponent($('gmail-to-input').value.trim());
+      const su = encodeURIComponent($('gmail-subject-input').value.trim());
+      const body = encodeURIComponent($('gmail-body-textarea').value.trim());
+      const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${su}&body=${body}`;
       window.open(url, '_blank', 'noopener,noreferrer');
-      logComm(opp, 'email', subject || 'Outreach email');
-      showToast('Opening Gmail compose');
+      showToast('Opened Gmail draft compose');
     }
 
-    async function logComm(opp, type, title) {
-      const comm = {
-        type,
-        recipient: store.state.currentGmailTarget === 'hm'
-          ? (opp.hiringManagerName || opp.hiringManagerEmail || 'Hiring Manager')
-          : (opp.contactName || opp.contactEmail || 'Talent Partner'),
-        title,
-        content: $('gmail-body-textarea').value.slice(0, 200),
-        time: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }),
-      };
-      opp.comms = opp.comms || [];
-      opp.comms.unshift(comm);
-
-      renderToolWorkpads();
-      updateToolDockPills();
-      await api('POST', `/api/opportunities/${encodeURIComponent(opp.id)}/comms`, comm);
-    }
-
-    function saveDraftToComms() {
+    async function saveDraftToComms() {
       const opp = getSelectedOpp();
       if (!opp) return;
-      logComm(opp, 'draft', $('gmail-subject-input').value || 'Saved Draft');
-      showToast('Draft saved to comms history');
+
+      const subject = $('gmail-subject-input').value.trim() || 'Email draft';
+      const to = $('gmail-to-input').value.trim() || (opp.contacts?.[0]?.name || 'Outreach');
+      const today = new Date().toISOString().slice(0, 10);
+
+      try {
+        const res = await api('POST', `/api/opportunities/${encodeURIComponent(opp.id)}/comms`, {
+          date: today,
+          contactName: to,
+          method: 'email',
+          summary: `Drafted note: "${subject}"`
+        });
+
+        opp.comms = opp.comms || [];
+        opp.comms.unshift(res);
+        renderContactHistoryList(opp);
+        renderBoard();
+        showToast('Saved to Contact History!');
+      } catch (err) {
+        showToast(`Save failed: ${err.message}`, true);
+      }
     }
 
     // ================= PARAMETER EDIT MODAL =================
@@ -1756,14 +1376,12 @@
       $('param-ote').value = p.targetOte || 150000;
       $('param-years').value = p.yearsExperience || 5;
       $('param-summary').value = p.backgroundSummary || '';
-      $('param-headline').value = p.headline || '';
       $('param-gemini-key').value = p.geminiApiKey || '';
 
       updateGeminiStatusBadge(p.hasGeminiKey);
-      $('test-key-feedback').textContent = '';
-
       $('param-modal-container').classList.remove('hidden');
       $('param-name').focus();
+      refreshIcons();
     }
 
     function closeParameterModal() {
@@ -1771,123 +1389,98 @@
     }
 
     function updateGeminiStatusBadge(active) {
-      const pill = $('gemini-status-pill');
+      const badge = $('gemini-status-badge');
       if (active) {
-        pill.textContent = 'Active (Gemini 1.5 Flash)';
-        pill.className = 'text-[10px] font-mono px-2 py-0.5 rounded border font-semibold bg-emerald-950/80 border-emerald-700 text-emerald-300';
+        badge.textContent = 'Connected';
+        badge.className = 'text-[10px] font-mono px-2 py-0.5 rounded border bg-purple-950/80 border-purple-800 text-purple-300 font-semibold';
       } else {
-        pill.textContent = 'Inactive (Local Fallback)';
-        pill.className = 'text-[10px] font-mono px-2 py-0.5 rounded border font-semibold bg-slate-800 border-slate-700 text-slate-400';
+        badge.textContent = 'Not Connected';
+        badge.className = 'text-[10px] font-mono px-2 py-0.5 rounded border bg-slate-800 border-slate-700 text-slate-400';
       }
     }
 
     async function testGeminiApiKey() {
-      const rawKey = $('param-gemini-key').value.trim();
-      const feedback = $('test-key-feedback');
-      const spinner = $('test-key-spinner');
-
-      if (!rawKey) {
-        feedback.textContent = 'Please paste your Gemini API key first.';
-        feedback.className = 'text-[11px] font-mono mt-1 text-amber-400 font-semibold';
-        return;
-      }
+      const key = $('param-gemini-key').value.trim();
+      const spinner = $('gemini-test-spinner');
+      const resultEl = $('gemini-test-result');
 
       spinner.classList.remove('hidden');
-      feedback.textContent = 'Connecting to Google Gemini API…';
-      feedback.className = 'text-[11px] font-mono mt-1 text-slate-400';
+      resultEl.classList.add('hidden');
 
       try {
-        const res = await fetch('/api/ai/test-key', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ apiKey: rawKey }),
-        }).then(r => r.json()).catch(() => null);
-
-        spinner.classList.add('hidden');
-
-        if (res && res.valid) {
-          feedback.textContent = '✓ ' + res.message;
-          feedback.className = 'text-[11px] font-mono mt-1 text-emerald-400 font-semibold';
-          updateGeminiStatusBadge(true);
-        } else {
-          const msg = res && res.message ? res.message : 'Could not authenticate. Check your connection or API key.';
-          feedback.textContent = '✗ ' + msg;
-          feedback.className = 'text-[11px] font-mono mt-1 text-red-400 font-semibold';
-          updateGeminiStatusBadge(false);
-        }
+        const res = await api('POST', '/api/ai/test-key', { apiKey: key });
+        resultEl.textContent = res.message;
+        resultEl.className = `text-[11px] font-mono p-2 rounded border block ${
+          res.valid ? 'bg-emerald-950/70 border-emerald-800 text-emerald-300' : 'bg-red-950/70 border-red-800 text-red-300'
+        }`;
+        resultEl.classList.remove('hidden');
+        updateGeminiStatusBadge(res.valid);
       } catch (err) {
+        resultEl.textContent = `Test failed: ${err.message}`;
+        resultEl.className = 'text-[11px] font-mono p-2 rounded border block bg-red-950/70 border-red-800 text-red-300';
+        resultEl.classList.remove('hidden');
+      } finally {
         spinner.classList.add('hidden');
-        feedback.textContent = '✗ Connection error: ' + err.message;
-        feedback.className = 'text-[11px] font-mono mt-1 text-red-400 font-semibold';
-        updateGeminiStatusBadge(false);
       }
     }
 
     async function saveParameters() {
-      const spinner = $('save-params-spinner');
-      spinner.classList.remove('hidden');
-
-      const payload = {
+      const updates = {
         name: $('param-name').value.trim() || 'Candidate',
         email: $('param-email').value.trim(),
         location: $('param-location').value.trim(),
-        targetRole: $('param-role').value.trim() || 'Account Executive',
+        targetRole: $('param-role').value.trim(),
         targetOte: Number($('param-ote').value) || 150000,
         yearsExperience: Number($('param-years').value) || 5,
         backgroundSummary: $('param-summary').value.trim(),
-        headline: $('param-headline').value.trim(),
         geminiApiKey: $('param-gemini-key').value.trim(),
       };
 
-      const updated = await api('PATCH', '/api/profile', payload);
-      spinner.classList.add('hidden');
-
-      if (updated) {
-        store.set({ profile: updated });
-        applyProfileToUI(updated);
+      try {
+        const saved = await api('PATCH', '/api/profile', updates);
+        store.set({ profile: saved });
+        applyProfileToUI(saved);
         closeParameterModal();
-        showToast('Parameters and career profile updated');
+        showToast('Candidate settings saved');
+      } catch (err) {
+        showToast(`Failed to save settings: ${err.message}`, true);
       }
     }
 
     function applyProfileToUI(p) {
       if (!p) return;
-      $('header-candidate-badge').textContent = `${p.name} • ${p.headline || p.targetRole || 'Job Hunter'}`;
-      $('gmail-from').textContent = p.email || `${p.name} (add Gmail in Parameter Edit)`;
-      updateGeminiStatusBadge(p.hasGeminiKey);
+      $('gmail-from').textContent = p.email ? `${p.name} <${p.email}>` : `${p.name} (no email set)`;
     }
 
     // ================= ACTIONS & CRUD =================
-    const newId = (prefix) => `${prefix}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-
     async function createOpportunity() {
-      const prof = store.state.profile || {};
-      const defaultComp = prof.targetOte || 150000;
-      const defaultRole = prof.targetRole || 'Target Role';
+      const defaultCompany = 'New Target Company';
+      try {
+        const res = await api('POST', '/api/opportunities', {
+          company: defaultCompany,
+          companyDescription: '',
+          stageId: 'targeted',
+          contacts: [],
+        });
 
-      const opp = {
-        id: newId('job-'),
-        title: defaultRole,
-        company: 'New Target Company',
-        location: prof.location || 'Remote',
-        stageId: 'wishlist',
-        value: defaultComp,
-        contactName: '', contactEmail: '', contactRole: 'Recruiter',
-        hiringManagerName: '', hiringManagerEmail: '', jobUrl: '',
-        orderIndex: Date.now(),
-        matchScore: 0,
-        matchDetails: {},
-        proofOfWork: { artifactName: '30-60-90 Day Execution Plan', artifactType: 'One-page plan', status: 'planned', artifactUrl: '' },
-        jobDetails: { team: '', requirements: '', techStack: '', compensation: `$${Math.round(defaultComp/1000)}k Target OTE`, isTemplate: false },
-        notes: [], tasks: [], comms: [],
-      };
+        const newOpp = {
+          id: res.id,
+          company: defaultCompany,
+          companyDescription: '',
+          stageId: 'targeted',
+          contacts: [],
+          comms: [],
+          orderIndex: 0,
+        };
 
-      store.state.opportunities.unshift(opp);
-      openCockpit(opp.id);
-      showToast('Created application. Enter details and paste posting.');
-
-      const { notes, tasks, comms, ...payload } = opp;
-      await api('POST', '/api/opportunities', payload);
+        store.state.opportunities.unshift(newOpp);
+        renderBoard();
+        openCockpit(newOpp.id);
+        $('cockpit-company').select();
+        showToast('Created new opportunity');
+      } catch (err) {
+        showToast(`Creation failed: ${err.message}`, true);
+      }
     }
 
     async function deleteOpportunity(id) {
@@ -1895,269 +1488,130 @@
       if (!opp) return;
 
       const confirmed = await showConfirmModal({
-        title: `Delete Application?`,
-        message: `Delete ${opp.company} (${opp.title})? This will permanently remove its notes, tasks, and communications.`,
-        confirmText: 'Delete Application',
+        title: 'Delete Opportunity',
+        message: `Permanently delete ${opp.company || 'this opportunity'}? All contact history will be removed.`,
+        confirmText: 'Delete Opportunity',
         isDestructive: true
       });
 
       if (!confirmed) return;
 
-      store.set({
-        opportunities: store.state.opportunities.filter((o) => o.id !== id),
-        selectedOppId: store.state.selectedOppId === id ? null : store.state.selectedOppId
-      });
-
-      if (store.state.selectedOppId === null) {
+      try {
+        await api('DELETE', `/api/opportunities/${encodeURIComponent(id)}`);
+        store.set({
+          opportunities: store.state.opportunities.filter((o) => o.id !== id),
+          selectedOppId: null
+        });
         closeCockpit();
+        showToast(`Deleted ${opp.company}`);
+      } catch (err) {
+        showToast(`Deletion failed: ${err.message}`, true);
       }
-
-      renderBoard();
-      showToast(`Deleted ${opp.company} application`);
-      await api('DELETE', `/api/opportunities/${encodeURIComponent(id)}`);
     }
 
-    function reorderOpportunity(id, stageId, direction) {
-      const stageOpps = store.state.opportunities.filter((o) => o.stageId === stageId).sort(byOrderIndex);
-      const currIdx = stageOpps.findIndex((o) => o.id === id);
-      if (currIdx === -1) return;
+    async function reorderOpportunity(id, stageId, direction) {
+      const oppsInStage = store.state.opportunities
+        .filter((o) => (o.stageId || 'targeted') === stageId)
+        .sort(byOrderIndex);
 
-      const targetIdx = direction === 'up' ? currIdx - 1 : currIdx + 1;
-      if (targetIdx < 0 || targetIdx >= stageOpps.length) return;
+      const idx = oppsInStage.findIndex((o) => o.id === id);
+      if (idx === -1) return;
 
-      const current = stageOpps[currIdx];
-      const target = stageOpps[targetIdx];
+      const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (targetIdx < 0 || targetIdx >= oppsInStage.length) return;
 
-      const swappedIndex = current.orderIndex;
-      current.orderIndex = target.orderIndex;
-      target.orderIndex = swappedIndex;
+      const current = oppsInStage[idx];
+      const target = oppsInStage[targetIdx];
+
+      const tempOrder = current.orderIndex || 1000;
+      current.orderIndex = target.orderIndex || 1000;
+      target.orderIndex = tempOrder;
 
       renderBoard();
-      api('POST', '/api/opportunities/reorder', {
-        opportunityId: current.id,
-        newStageId: stageId,
-        newOrderIndex: current.orderIndex
-      });
-      api('POST', '/api/opportunities/reorder', {
-        opportunityId: target.id,
-        newStageId: stageId,
-        newOrderIndex: target.orderIndex
-      });
+
+      try {
+        await api('POST', '/api/opportunities/reorder', {
+          opportunityId: current.id,
+          newStageId: stageId,
+          newOrderIndex: current.orderIndex
+        });
+      } catch (err) {
+        showToast(`Reorder failed: ${err.message}`, true);
+      }
     }
 
     function changeStage(opp, stageId) {
+      if (opp.stageId === stageId) return;
       opp.stageId = stageId;
-      $('cockpit-stage-select').value = stageId;
-      renderBoard();
       saveOpp(opp, { stageId });
-      const stageName = STAGES.find((s) => s.id === stageId)?.name || stageId;
-      showToast(`Moved to ${stageName}`);
-      announceToScreenReader(`Moved to ${stageName}`);
+      renderBoard();
+      showToast(`Moved ${opp.company} to ${STAGES.find(s => s.id === stageId)?.name || stageId}`);
     }
 
     function advanceStage(opp) {
-      const nextIdx = STAGE_IDS.indexOf(opp.stageId) + 1;
-      if (nextIdx < STAGE_IDS.length) {
-        changeStage(opp, STAGE_IDS[nextIdx]);
+      const currentIndex = STAGE_IDS.indexOf(opp.stageId || 'targeted');
+      if (currentIndex < STAGE_IDS.length - 1) {
+        const nextStage = STAGE_IDS[currentIndex + 1];
+        changeStage(opp, nextStage);
+        $('cockpit-stage-select').value = nextStage;
       } else {
-        showToast('Application is already at final Offer & Negotiation stage');
+        showToast(`${opp.company} is already in ${STAGES[currentIndex].name}`);
       }
     }
 
-    // ================= EVENT DELEGATION =================
-    function onBoardClick(e) {
-      const card = e.target.closest('[data-opp-id]');
-      if (!card) return;
-
-      const { oppId, stageId } = card.dataset;
-      const actionBtn = e.target.closest('[data-action]');
-      const action = actionBtn?.dataset.action;
-
-      if (action === 'move-up') {
-        e.stopPropagation();
-        reorderOpportunity(oppId, stageId, 'up');
-      } else if (action === 'move-down') {
-        e.stopPropagation();
-        reorderOpportunity(oppId, stageId, 'down');
-      } else {
-        openCockpit(oppId);
-      }
-    }
-
-    function onBoardKeyDown(e) {
-      const card = e.target.closest('[data-opp-id]');
-      if (!card) return;
-
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        openCockpit(card.dataset.oppId);
-      }
-    }
-
-    function onWorkpadClick(e) {
-      const el = e.target.closest('[data-action]');
-      if (!el) return;
-
-      const opp = getSelectedOpp();
-      if (!opp) return;
-
-      const action = el.dataset.action;
-      if (action === 'toggle-workpad') {
-        const tool = el.dataset.tool;
-        store.state.toolDock[tool] = !store.state.toolDock[tool];
-        updateToolDockPills();
-        renderToolWorkpads();
-      } else if (action === 'add-note') {
-        const input = $('input-new-note');
-        const content = input ? input.value.trim() : '';
-        if (!content) return;
-        input.value = '';
-        const note = {
-          id: newId('n-'),
-          type: 'prep',
-          title: 'Prep Note',
-          content,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-        opp.notes = opp.notes || [];
-        opp.notes.unshift(note);
-        renderToolWorkpads();
-        updateToolDockPills();
-        api('POST', `/api/opportunities/${encodeURIComponent(opp.id)}/notes`, note);
-      } else if (action === 'add-story') {
-        const story = storyById(el.dataset.story);
-        if (!story) return;
-        const note = {
-          id: newId('n-'),
-          type: 'story',
-          title: `STAR: ${story.title}`,
-          content: `${story.situation} ${story.task} ${story.action} ${story.result}`,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-        opp.notes = opp.notes || [];
-        opp.notes.unshift(note);
-        renderToolWorkpads();
-        updateToolDockPills();
-        showToast(`Attached ${story.title}`);
-        api('POST', `/api/opportunities/${encodeURIComponent(opp.id)}/notes`, note);
-      } else if (action === 'add-story-picked') {
-        const picker = $('story-picker');
-        if (!picker) return;
-        const story = storyById(picker.value);
-        if (!story) return;
-        const note = {
-          id: newId('n-'),
-          type: 'story',
-          title: `STAR: ${story.title}`,
-          content: `${story.situation} ${story.task} ${story.action} ${story.result}`,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-        opp.notes = opp.notes || [];
-        opp.notes.unshift(note);
-        renderToolWorkpads();
-        updateToolDockPills();
-        showToast(`Attached ${story.title}`);
-        api('POST', `/api/opportunities/${encodeURIComponent(opp.id)}/notes`, note);
-      } else if (action === 'add-task') {
-        const input = $('input-new-task');
-        const title = input ? input.value.trim() : '';
-        if (!title) return;
-        input.value = '';
-        const task = { id: newId('t-'), title, category: 'outreach', isCompleted: false };
-        opp.tasks = opp.tasks || [];
-        opp.tasks.push(task);
-        renderToolWorkpads();
-        updateToolDockPills();
-        renderBoard();
-        api('POST', `/api/opportunities/${encodeURIComponent(opp.id)}/tasks`, task);
-      } else if (action === 'delete-task') {
-        const taskId = el.closest('[data-task-id]').dataset.taskId;
-        opp.tasks = (opp.tasks || []).filter((t) => t.id !== taskId);
-        renderToolWorkpads();
-        updateToolDockPills();
-        renderBoard();
-        api('DELETE', `/api/tasks/${encodeURIComponent(taskId)}`);
-      } else if (action === 'open-browser') {
-        openAuxWorkspace('browser');
-      }
-    }
-
-    function onWorkpadChange(e) {
-      const opp = getSelectedOpp();
-      if (!opp) return;
-
-      if (e.target.matches('.task-checkbox')) {
-        const taskId = e.target.closest('[data-task-id]').dataset.taskId;
-        const task = (opp.tasks || []).find((t) => t.id === taskId);
-        if (!task) return;
-        task.isCompleted = e.target.checked;
-        api('PATCH', `/api/tasks/${encodeURIComponent(taskId)}`, { isCompleted: task.isCompleted });
-        renderBoard();
-      } else if (e.target.dataset.proof) {
-        opp.proofOfWork = { ...opp.proofOfWork, [e.target.dataset.proof]: e.target.value.trim() };
-        saveOpp(opp, { proofOfWork: opp.proofOfWork });
-        renderBoard();
-        if (e.target.dataset.proof === 'artifactUrl') renderToolWorkpads();
-      }
-    }
-
-    function bindField(id, field, { numeric = false, onChange } = {}) {
-      $(id)?.addEventListener('input', (e) => {
-        const opp = getSelectedOpp();
-        if (!opp) return;
-        opp[field] = numeric ? Number(e.target.value) || 0 : e.target.value;
-        saveOpp(opp, { [field]: opp[field] });
-        if (onChange) onChange(opp);
-      });
-    }
-
+    // ================= EVENT DELEGATION & LISTENERS =================
     function bindGlobalEvents() {
-      const on = (id, evt, fn) => $(id)?.addEventListener(evt, fn);
+      // Header controls
+      on('btn-add-opp', 'click', createOpportunity);
+      on('btn-parameter-edit', 'click', openParameterModal);
+      on('param-modal-close', 'click', closeParameterModal);
+      on('param-btn-cancel', 'click', closeParameterModal);
+      on('param-btn-save', 'click', saveParameters);
+      on('btn-test-gemini', 'click', testGeminiApiKey);
 
+      // Search and Filter
       on('search-input', 'input', (e) => {
         store.set({ searchQuery: e.target.value });
-        $('btn-clear-search')?.classList.toggle('hidden', !e.target.value);
+        $('btn-clear-search').classList.toggle('hidden', !e.target.value);
         renderBoard();
       });
-
       on('btn-clear-search', 'click', () => {
         $('search-input').value = '';
-        $('btn-clear-search').classList.add('hidden');
         store.set({ searchQuery: '' });
+        $('btn-clear-search').classList.add('hidden');
         renderBoard();
         $('search-input').focus();
       });
-
       on('stage-filter', 'change', (e) => {
         store.set({ stageFilter: e.target.value });
         renderBoard();
       });
 
-      on('btn-add-opp', 'click', createOpportunity);
-      on('btn-parameter-edit', 'click', openParameterModal);
+      // Board Clicks
+      $('board-container').addEventListener('click', (e) => {
+        const upBtn = e.target.closest('[data-action="move-up"]');
+        if (upBtn) {
+          e.stopPropagation();
+          const card = upBtn.closest('[data-opp-id]');
+          if (card) reorderOpportunity(card.dataset.oppId, card.dataset.stageId, 'up');
+          return;
+        }
 
-      // Parameter Modal Events
-      on('param-modal-close', 'click', closeParameterModal);
-      on('btn-cancel-params', 'click', closeParameterModal);
-      on('btn-save-params', 'click', saveParameters);
-      on('btn-test-gemini-key', 'click', testGeminiApiKey);
-      on('btn-toggle-key-vis', 'click', () => {
-        const inp = $('param-gemini-key');
-        const btn = $('btn-toggle-key-vis');
-        if (inp.type === 'password') {
-          inp.type = 'text';
-          btn.textContent = 'Hide';
-        } else {
-          inp.type = 'password';
-          btn.textContent = 'Show';
+        const downBtn = e.target.closest('[data-action="move-down"]');
+        if (downBtn) {
+          e.stopPropagation();
+          const card = downBtn.closest('[data-opp-id]');
+          if (card) reorderOpportunity(card.dataset.oppId, card.dataset.stageId, 'down');
+          return;
+        }
+
+        const card = e.target.closest('[data-opp-id]');
+        if (card) {
+          openCockpit(card.dataset.oppId);
         }
       });
 
-      // Board
-      on('board-container', 'click', onBoardClick);
-      on('board-container', 'keydown', onBoardKeyDown);
-
-      // Cockpit Drawer
+      // Cockpit Drawer Actions
       on('cockpit-close-btn', 'click', closeCockpit);
       on('cockpit-delete-btn', 'click', () => {
         if (store.state.selectedOppId) deleteOpportunity(store.state.selectedOppId);
@@ -2170,50 +1624,234 @@
         const opp = getSelectedOpp();
         if (opp) advanceStage(opp);
       });
-      on('cockpit-open-aux-btn', 'click', () => openAuxWorkspace(store.state.activeAuxTab));
 
-      bindField('cockpit-company', 'company', { onChange: (opp) => { renderCockpitHeader(opp); renderBoard(); } });
-      bindField('cockpit-title-input', 'title', { onChange: (opp) => { renderCockpitHeader(opp); renderBoard(); } });
-      bindField('cockpit-value-input', 'value', { numeric: true, onChange: renderBoard });
-      bindField('cockpit-hm-name', 'hiringManagerName', { onChange: renderBoard });
-      bindField('cockpit-hm-email', 'hiringManagerEmail');
-      bindField('cockpit-contact-name', 'contactName');
-      bindField('cockpit-contact-email', 'contactEmail');
-
-      COCKPIT_TOOLS.forEach((tool) => {
-        on(`tag-${tool}`, 'click', () => {
-          store.state.toolDock[tool] = !store.state.toolDock[tool];
-          updateToolDockPills();
-          renderToolWorkpads();
-        });
+      // 1. Company Name input auto-save
+      $('cockpit-company').addEventListener('input', (e) => {
+        const opp = getSelectedOpp();
+        if (!opp) return;
+        opp.company = e.target.value.trim() || 'Company';
+        saveOpp(opp, { company: opp.company });
+        renderBoard();
       });
 
-      on('tag-browser', 'click', () => toggleAuxWorkspace('browser'));
-      on('tag-gmail', 'click', () => toggleAuxWorkspace('gmail'));
-      on('cockpit-tools-container', 'click', onWorkpadClick);
-      on('cockpit-tools-container', 'change', onWorkpadChange);
+      // 2. Company description input
+      $('cockpit-company-desc').addEventListener('input', (e) => {
+        const opp = getSelectedOpp();
+        if (!opp) return;
+        opp.companyDescription = e.target.value;
+        saveOpp(opp, { companyDescription: opp.companyDescription });
+        renderBoard();
+      });
 
-      // Aux Tabs
+      // 3. Points of Contact: Add, Edit, Delete, Toggle Email/Phone
+      on('btn-add-contact-row', 'click', () => {
+        const opp = getSelectedOpp();
+        if (!opp) return;
+
+        opp.contacts = opp.contacts || [];
+        opp.contacts.push({ id: `c-${Date.now()}`, name: '', role: '', email: '', phone: '', contactType: 'email' });
+        renderContactsList(opp);
+        saveOpp(opp, { contacts: opp.contacts });
+
+        // Focus new contact name input
+        const inputs = document.querySelectorAll('.contact-name-input');
+        if (inputs.length > 0) inputs[inputs.length - 1].focus();
+      });
+
+      $('contacts-list-container').addEventListener('input', (e) => {
+        const opp = getSelectedOpp();
+        if (!opp) return;
+
+        const nameInput = e.target.closest('.contact-name-input');
+        if (nameInput) {
+          const idx = Number(nameInput.dataset.idx);
+          if (opp.contacts && opp.contacts[idx]) {
+            opp.contacts[idx].name = nameInput.value;
+            saveOpp(opp, { contacts: opp.contacts });
+            renderBoard();
+          }
+          return;
+        }
+
+        const roleInput = e.target.closest('.contact-role-input');
+        if (roleInput) {
+          const idx = Number(roleInput.dataset.idx);
+          if (opp.contacts && opp.contacts[idx]) {
+            opp.contacts[idx].role = roleInput.value;
+            saveOpp(opp, { contacts: opp.contacts });
+            renderBoard();
+          }
+          return;
+        }
+
+        const valInput = e.target.closest('.contact-val-input');
+        if (valInput) {
+          const idx = Number(valInput.dataset.idx);
+          const field = valInput.dataset.field || 'email';
+          if (opp.contacts && opp.contacts[idx]) {
+            opp.contacts[idx][field] = valInput.value;
+            saveOpp(opp, { contacts: opp.contacts });
+          }
+          return;
+        }
+      });
+
+      $('contacts-list-container').addEventListener('click', (e) => {
+        const opp = getSelectedOpp();
+        if (!opp) return;
+
+        // Toggle email vs phone mode
+        const toggleBtn = e.target.closest('.btn-toggle-contact-mode');
+        if (toggleBtn) {
+          const idx = Number(toggleBtn.dataset.idx);
+          const newMode = toggleBtn.dataset.mode;
+          if (opp.contacts && opp.contacts[idx]) {
+            opp.contacts[idx].contactType = newMode;
+            saveOpp(opp, { contacts: opp.contacts });
+            renderContactsList(opp);
+            const valInput = $('contacts-list-container').querySelector(`.contact-val-input[data-idx="${idx}"]`);
+            if (valInput) valInput.focus();
+          }
+          return;
+        }
+
+        // Delete contact
+        const delBtn = e.target.closest('.btn-delete-contact');
+        if (delBtn) {
+          const idx = Number(delBtn.dataset.idx);
+          if (opp.contacts && opp.contacts[idx] !== undefined) {
+            opp.contacts.splice(idx, 1);
+            renderContactsList(opp);
+            saveOpp(opp, { contacts: opp.contacts });
+            renderBoard();
+            showToast('Contact removed');
+          }
+          return;
+        }
+      });
+
+      // 4. Contact History: Toggle new box, Log Entry & Delete
+      on('btn-toggle-new-history', 'click', () => {
+        const box = $('history-form-box');
+        const isHidden = box.classList.contains('hidden');
+        if (isHidden) {
+          box.classList.remove('hidden');
+          const opp = getSelectedOpp();
+          if (opp) initHistoryForm(opp);
+          $('history-summary-input').focus();
+        } else {
+          box.classList.add('hidden');
+        }
+      });
+
+      on('btn-cancel-new-history', 'click', () => {
+        $('history-form-box').classList.add('hidden');
+      });
+
+      on('btn-log-history', 'click', async () => {
+        const opp = getSelectedOpp();
+        if (!opp) return;
+
+        const dateVal = $('history-date-input').value || new Date().toISOString().slice(0, 10);
+        const contactName = $('history-contact-input').value.trim() || 'Point of Contact';
+        const method = $('history-method-select').value;
+        const summary = $('history-summary-input').value.trim();
+
+        if (!summary) {
+          showToast('Enter a brief summary for the interaction', true);
+          $('history-summary-input').focus();
+          return;
+        }
+
+        try {
+          const res = await api('POST', `/api/opportunities/${encodeURIComponent(opp.id)}/comms`, {
+            date: dateVal,
+            contactName,
+            method,
+            summary
+          });
+
+          opp.comms = opp.comms || [];
+          opp.comms.unshift(res);
+          renderContactHistoryList(opp);
+          $('history-summary-input').value = '';
+          $('history-form-box').classList.add('hidden');
+          renderBoard();
+          showToast('Interaction logged!');
+        } catch (err) {
+          showToast(`Logging failed: ${err.message}`, true);
+        }
+      });
+
+      $('contact-history-list').addEventListener('click', async (e) => {
+        const delBtn = e.target.closest('.btn-delete-comm');
+        if (!delBtn) return;
+
+        const opp = getSelectedOpp();
+        if (!opp) return;
+
+        const commId = delBtn.dataset.commId;
+        try {
+          await api('DELETE', `/api/comms/${encodeURIComponent(commId)}`);
+          opp.comms = (opp.comms || []).filter(c => c.id !== commId);
+          renderContactHistoryList(opp);
+          renderBoard();
+          showToast('Contact history entry deleted');
+        } catch (err) {
+          showToast(`Delete failed: ${err.message}`, true);
+        }
+      });
+
+      // 5. Tools launch buttons
+      on('btn-open-browser-tool', 'click', () => openAuxWorkspace('browser'));
+      on('btn-open-gmail-tool', 'click', () => openAuxWorkspace('gmail'));
+
+      // Aux Workspace Tabs & Actions
       on('tab-btn-browser', 'click', () => selectAuxTab('browser'));
       on('tab-btn-gmail', 'click', () => selectAuxTab('gmail'));
       on('btn-close-aux', 'click', closeAuxWorkspace);
 
-      // Browser Actions
-      on('btn-clip-job', 'click', analyzePosting);
-      on('browser-content', 'click', (e) => {
-        if (e.target.closest('[data-action="analyze"]')) analyzePosting();
+      // Browser Actions: Go, Reload, URL Input, Open External
+      on('btn-browser-go', 'click', () => {
+        const opp = getSelectedOpp();
+        const url = $('browser-url-input').value.trim();
+        if (url) {
+          if (opp) {
+            opp.jobUrl = url;
+            saveOpp(opp, { jobUrl: url });
+          }
+          loadBrowserUrl(url);
+        }
       });
+
+      $('browser-url-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          $('btn-browser-go').click();
+        }
+      });
+
+      on('btn-browser-reload', 'click', () => {
+        const url = $('browser-url-input').value.trim();
+        if (url) loadBrowserUrl(url);
+      });
+
       on('browser-url-input', 'input', (e) => {
         const opp = getSelectedOpp();
         if (opp) {
           opp.jobUrl = e.target.value.trim();
           saveOpp(opp, { jobUrl: opp.jobUrl });
+          $('btn-open-posting').href = opp.jobUrl || '#';
         }
       });
-      on('btn-open-posting', 'click', () => {
+
+      on('btn-open-posting', 'click', (e) => {
         const url = safeUrl($('browser-url-input').value);
         if (url) window.open(url, '_blank', 'noopener,noreferrer');
-        else showToast('Enter a valid URL (https://...) first', true);
+        else {
+          e.preventDefault();
+          showToast('Enter a valid URL (https://...) first', true);
+        }
       });
 
       // Gmail Actions
@@ -2233,6 +1871,7 @@
       on('btn-gmail-send', 'click', openInGmail);
       on('btn-gmail-save-draft', 'click', saveDraftToComms);
 
+      // Keyboard navigation
       window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
           if (!$('param-modal-container').classList.contains('hidden')) {

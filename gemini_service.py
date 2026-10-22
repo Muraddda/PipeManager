@@ -24,6 +24,8 @@ def clean_api_key(raw_key):
     k = str(raw_key).strip()
     if "=" in k and ("KEY" in k.upper() or "GEMINI" in k.upper()):
         k = k.split("=", 1)[1].strip()
+    if k.lower().startswith("bearer "):
+        k = k[7:].strip()
     return k.strip("\"'`; \t\n\r")
 
 
@@ -40,16 +42,14 @@ def is_available(profile=None):
 
 
 def _safe_urlopen(req, timeout=15):
-    """Open request with SSL fallback for macOS environments missing local cert bundles."""
+    """Open request with SSL unverified context to prevent macOS cert bundle failures."""
     try:
-        ctx = ssl.create_default_context()
+        ctx = ssl._create_unverified_context()
+    except Exception:
+        ctx = None
+    if ctx:
         return urllib.request.urlopen(req, timeout=timeout, context=ctx)
-    except urllib.error.URLError as err:
-        err_str = str(err)
-        if "CERTIFICATE_VERIFY_FAILED" in err_str or "certificate verify failed" in err_str:
-            unverified_ctx = ssl._create_unverified_context()
-            return urllib.request.urlopen(req, timeout=timeout, context=unverified_ctx)
-        raise
+    return urllib.request.urlopen(req, timeout=timeout)
 
 
 def _call_gemini_model(model_name, api_key, prompt, system_instruction=None, json_mode=False, timeout=20):
@@ -117,41 +117,66 @@ def _call_gemini(api_key, prompt, system_instruction=None, json_mode=False, time
 
 
 def test_api_key(api_key):
-    """Verify an API key by making a test call, returning (success, detailed_message)."""
+    """Verify an API key by testing live generation on Gemini models."""
     clean_key = clean_api_key(api_key)
     if not clean_key:
-        return False, "Please enter an API key."
+        return False, "Please enter your Gemini API key."
 
+    # Strategy 1: Test generateContent on gemini-1.5-flash
     models_to_try = [PRIMARY_MODEL] + [m for m in FALLBACK_MODELS if m != PRIMARY_MODEL]
 
     for model in models_to_try:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={clean_key}"
-        payload = {"contents": [{"parts": [{"text": "Hello"}]}]}
-        data = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"}, method="POST")
-
+        payload = json.dumps({"contents": [{"parts": [{"text": "Hello"}]}]}).encode("utf-8")
+        req = urllib.request.Request(
+            url,
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
         try:
             with _safe_urlopen(req, timeout=12) as response:
-                if response.status == 200:
+                code = getattr(response, "status", None) or response.getcode()
+                if code in (200, 201):
                     return True, f"Verified: Connected successfully to Gemini ({model})!"
         except urllib.error.HTTPError as err:
             raw_err = err.read().decode("utf-8", errors="replace")
+            if err.code == 404:
+                # Model endpoint not found, try next fallback model
+                continue
             try:
-                err_json = json.loads(raw_err)
-                msg = err_json.get("error", {}).get("message", "")
+                err_data = json.loads(raw_err)
+                msg = err_data.get("error", {}).get("message", "")
                 if "API_KEY_INVALID" in raw_err or "API key not valid" in msg:
                     return False, "Invalid API key. Please generate a new key at aistudio.google.com."
-                if err.code == 404:
-                    continue
-                return False, f"Gemini Error ({err.code}): {msg or 'Authentication failed'}"
+                return False, f"Google API ({err.code}): {msg or raw_err[:200]}"
             except Exception:
-                return False, f"Authentication error (HTTP {err.code})."
+                return False, f"Authentication failed (HTTP {err.code}): {raw_err[:200]}"
         except urllib.error.URLError as err:
             return False, f"Network error connecting to Gemini API: {err.reason}"
         except Exception as exc:
             return False, f"Connection failed: {str(exc)}"
 
-    return False, "Could not connect to Gemini models. Check your API key at aistudio.google.com."
+    # Strategy 2: Fallback to models catalog check
+    catalog_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={clean_key}"
+    catalog_req = urllib.request.Request(catalog_url, headers={"Content-Type": "application/json"}, method="GET")
+    try:
+        with _safe_urlopen(catalog_req, timeout=10) as response:
+            code = getattr(response, "status", None) or response.getcode()
+            if code in (200, 201):
+                return True, "Verified: Connected successfully to Google Gemini API!"
+    except urllib.error.HTTPError as err:
+        raw_err = err.read().decode("utf-8", errors="replace")
+        try:
+            err_data = json.loads(raw_err)
+            msg = err_data.get("error", {}).get("message", "")
+            return False, f"Google API ({err.code}): {msg or 'Invalid API key'}"
+        except Exception:
+            return False, f"HTTP {err.code}: Authentication error"
+    except Exception as exc:
+        return False, f"Connection error: {str(exc)}"
+
+    return False, "Could not authenticate with Gemini. Check your API key at aistudio.google.com."
 
 
 def _build_system_grounding(profile):
@@ -312,3 +337,58 @@ Return a valid JSON object:
     except Exception as e:
         print(f"[Gemini Lint Parse Error]: {e}")
         return None
+
+
+def generate_company_description(company, context="", profile=None):
+    """Generate a crisp, one-line description of what the company does."""
+    api_key = get_api_key(profile)
+    company_name = (company or "").strip()
+    if not company_name:
+        return "Innovative technology and enterprise solutions provider."
+
+    if api_key:
+        prompt = f"""Provide a crisp, professional, single-sentence (one line) description of what the company "{company_name}" does.
+Keep it strictly under 25 words. Plain text only, no quotes, no markdown, no conversational filler.
+Additional context if any: {context[:600]}
+"""
+        desc = _call_gemini(api_key, prompt, timeout=15)
+        if desc:
+            clean = desc.strip().strip('"\'`')
+            if clean:
+                return clean
+
+    # Clean fallback if no API key or API call fails
+    return f"{company_name} provides specialized solutions and enterprise services."
+
+
+def suggest_contacts(company, role="", context="", profile=None):
+    """Suggest key hiring points of contact (names and roles) for this opportunity."""
+    api_key = get_api_key(profile)
+    company_name = (company or "Company").strip()
+
+    if api_key:
+        prompt = f"""For a target opportunity at "{company_name}" (Target Role: {role or 'Professional'}), suggest 2-3 key hiring points of contact with name and role.
+Return ONLY a valid JSON object matching this schema:
+{{
+  "contacts": [
+    {{"name": "Hiring Manager", "role": "VP of Department / Hiring Lead", "email": ""}},
+    {{"name": "Talent Partner", "role": "Senior Recruiter", "email": ""}}
+  ]
+}}
+Context: {context[:600]}
+"""
+        raw = _call_gemini(api_key, prompt, json_mode=True, timeout=15)
+        if raw:
+            try:
+                data = json.loads(raw)
+                contacts = data.get("contacts", [])
+                if isinstance(contacts, list) and contacts:
+                    return contacts
+            except Exception:
+                pass
+
+    return [
+        {"name": "Hiring Manager", "role": "Department Head", "email": ""},
+        {"name": "Talent Partner", "role": "Recruiter", "email": ""}
+    ]
+
